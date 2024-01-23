@@ -69,10 +69,12 @@ Avant toute chose, il faut définir les sommets du cube.
 On peut réaliser cette opération de plusieurs manières, soit statiquement, soit dynamiquement.
 La structure utilisée est des plus simples :
 
-    typedef struct
-    {
-      double x,y,z;
-    } Point;
+```C
+typedef struct
+{
+  double x,y,z;
+} Point;
+```
 
 Pour les sommets, nous pouvons les définir de la manière suivante :
 
