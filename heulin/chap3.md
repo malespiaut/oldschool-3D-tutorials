@@ -59,11 +59,11 @@ Nous avons ici une rotation d’angle a autour de l’origine.
 En supposant que les points A et B soient sur le cercle trigonométrique (pour ceux qui aurait oublié : A(1,0) et B(0,1)), nous avons clairement :
 
 ```math
-x_{A’} = cos(a) \text{et} x_{B’} = -sin(a)
+x_{A’} = cos(a) & \text{et} & x_{B’} = -sin(a)
 ```
 
 ```math
-y_{A’} = sin(a) \text{et} y_{B’} = cos(a)
+y_{A’} = sin(a) & \text{et} & y_{B’} = cos(a)
 ```
 
 Cette opération n’est autre qu’un calcul matriciel, et vous devez certainement savoir comment l’effectuer.
