@@ -24,7 +24,19 @@ Au lieu d’avoir une liste de coordonnées (x,y,z) pour représenter nos faces,
 ## Un exemple simple
 
 Avant d’aller plus loin, prenons un des objets le plus élémentaire en 3D : le Cube.
-Pour un cube de coté 200 centré sur l’origine, nous pouvons définir ses sommets de la manière suivante :\
+Pour un cube de coté 200 centré sur l’origine, nous pouvons définir ses sommets de la manière suivante :
+
+|Point #|X|Y|Z|
+|---|---|---|---|
+|0|-100|-100|-100-
+|1|100|-100|-100
+|2|100|100|-100|
+|3|-100|100|-100|
+|4|100|-100|100|
+|5|-100|-100|100|
+|6|-100|100|100|
+|7|100|100|100|
+
 
   -------------- ------- ------- -------
   **Point \#**   **X**   **Y**   **Z**
