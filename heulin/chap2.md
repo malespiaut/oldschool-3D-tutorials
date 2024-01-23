@@ -48,20 +48,9 @@ Pour les faces, nous pouvons utiliser la structure suivante :\
 |4|5,4,1,0|
 |4|3,2,7,6|
 
-
-  ------------------- ----------------------
-  **Nb de sommets**   **Liste des points**
-  4                   0,1,2,3
-  4                   1,4,7,2
-  4                   4,5,6,7
-  4                   5,0,3,6
-  4                   5,4,1,0
-  4                   3,2,7,6
-  ------------------- ----------------------
-
 L’objet est définit comme ci-dessous :
 
-![le cube en 3D](cube.gif){height="200" width="320" align="CENTER"}
+![le cube en 3D](src/cube.gif){height="200" width="320" align="CENTER"}
 
 Vous pouvez dès à présent remarquer que les numéros des sommets sont donnés de manière à décrire chaque face dans un sens précis.
 Dans notre exemple, lorsqu’on regarde une face, ses sommets sont numérotés dans le sens trigonométrique.
@@ -70,7 +59,7 @@ Dans notre exemple, lorsqu’on regarde une face, ses sommets sont numérotés d
 
 Bien.
 Tout cela est bien joli, mais en pratique qu’est-ce que ça donne ?
-Voici un petit programme qui ouvre un écran graphique et qui affiche un cube en perspective ([cube1.zip](cube1.zip)).
+Voici un petit programme qui ouvre un écran graphique et qui affiche un cube en perspective ([cube1.zip](src/cube1.zip)).
 Pour ce faire, nous utilisons une projection, qui est le seul moyen de représenter un objet 3D en 2D.
 Le principe sera expliqué dans le chapitre suivant.
 
@@ -97,7 +86,8 @@ Point cube1[8] = {0};
 puis faire appel à une fonction qui affectera une valeur a chacun de points :
 
 ```C
-void Initialiser(void)
+void
+Initialiser(void)
 {
   cube1[0].x = -100;  cube1[0].y = -100;  cube1[0].z = -100;
   cube1[1].x =  100;  cube1[1].y = -100;  cube1[1].z = -100;
@@ -124,10 +114,11 @@ Point cube2[8]= { -100,-100,-100,
 ```
 
 Pour afficher tous les sommets de notre cube, nous devons transformer leurs coordonnées 3D en coordonnées 2D, ce qui revient à faire une projection.
-Le principe en est simple : il suffit de diviser les valeurs X et Y de chaque point par la troisième valeur Z..
-Nous avons alors une *projection perspective.* Voici un petit schéma simple qui va vous éclairer l’esprit sur ce principe fondamental en 3D :
+Le principe en est simple : il suffit de diviser les valeurs X et Y de chaque point par la troisième valeur Z.
+Nous avons alors une *projection perspective*.
+Voici un petit schéma simple qui va vous éclairer l’esprit sur ce principe fondamental en 3D :
 
-![](perspec.gif){height="200" width="320"}
+![](src/perspec.gif){height="200" width="320"}
 
 Vous constatez qu’il est simple de calculer la valeur de Y’.
 Il en est de même pour X’.
@@ -137,13 +128,12 @@ En pratique, il est avantageux de choisir pour valeur de ***d*** une puissance d
 Voici une procédure C qui affiche chacun des points du cube en blanc :
 
 ```C
-void Sommet1(void)
+void
+Sommet1(void)
 {
-  int i;
-
   _setcolor(15);
 
-  for (i=0;i<8;i++)
+  for (size_t i = 0; i < 8; ++i)
   {
     _setpixel((cube1[i].x*256)/(cube1[i].z+Zoff)+Xoff,
               (cube1[i].y*256)/(cube1[i].z+Zoff)+Yoff);
@@ -158,17 +148,24 @@ Rien de plus simple : il suffit de tracer les arêtes entre les sommets projeté
 En reprenant le schéma de notre cube, cela devient un jeu d’enfant :
 
 ```C
-void FilDeFer(void)
+void
+FilDeFer(void)
 {
   _setcolor(15);
 
   // On affiche la face avant
-  ligne(0,1); ligne(1,2); ligne(2,3); ligne(3,0);
+  ligne(0,1);
+  ligne(1,2);
+  ligne(2,3);
+  ligne(3,0);
 
-  // Puis la face arriere
-  ligne(4,5); ligne(5,6); ligne(6,7); ligne(7,4);
+  // Puis la face arrière
+  ligne(4,5);
+  ligne(5,6);
+  ligne(6,7);
+  ligne(7,4);
 
-  // Et enfin les aretes restantes
+  // Et enfin les arêtes restantes
   ligne(0,5);
   ligne(1,4);
   ligne(2,7);
@@ -178,5 +175,5 @@ void FilDeFer(void)
 
 Voilà pour notre premier programme consistant à afficher un objet 3D.
 
-Vous pouvez retrouver les sources et l’exécutable ms-dos dans [cube1.zip](cube1.c)
+Vous pouvez retrouver les sources et l’exécutable MS-DOS dans [cube1.zip](src/cube1.c)
 
