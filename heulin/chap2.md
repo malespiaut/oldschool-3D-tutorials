@@ -28,7 +28,7 @@ Pour un cube de coté 200 centré sur l’origine, nous pouvons définir ses som
 
 |Point #|X|Y|Z|
 |---|---|---|---|
-|0|-100|-100|-100-
+|0|-100|-100|-100|
 |1|100|-100|-100
 |2|100|100|-100|
 |3|-100|100|-100|
