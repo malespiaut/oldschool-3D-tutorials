@@ -1,0 +1,437 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.03 [fr] (Win95; I) [Netscape]">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EF" VLINK="#55188A" ALINK="#FF0000">
+
+<CENTER><B><FONT SIZE=+3>Les objets &agrave; faces pleines</FONT></B></CENTER>
+&nbsp;
+
+<P><FONT SIZE=+1>Nos objets commencent &agrave; prendre de l'allure, mais
+ils sont toujours en fil de fer. Pour passer &agrave; l'&eacute;tape suivante
+et &eacute;liminer les parties cach&eacute;es, nous devons commencer par
+apprendre &agrave; remplir des polygones. Dans notre cas, nous nous limiterons
+aux polygones convexes, ce qui est largement suffisant en 3D. D'ailleurs,
+vu que nous g&eacute;rons &agrave; pr&eacute;sent uniquement des objets
+de 3DS, nous sommes surs que nous n'aurons que des triangles &agrave; remplir.
+Cependant, les fonctions fournies permettront de remplir n'importe quel
+type de polygones convexe, mais libre &agrave; vous de les optimiser.</FONT>
+
+<P><B><U><FONT SIZE=+2>1/ Remplissage de polygones</FONT></U></B>
+
+<P><FONT SIZE=+1>Si nous nous limitons aux polygones convexes, c'est qu'il
+y a une bonne raison. En effet, lorsque nous dessinons un polygone, nous
+tra&ccedil;ons en fait des lignes horizontales. Avec cette restriction,
+nous n'aurons besoin de stocker que l'abscisse de d&eacute;part et de fin
+pour chaque ligne Y de l'&eacute;cran.</FONT>
+
+<P><FONT SIZE=+1>Notre algorithme va donc devoir commencer par calculer
+la coordonn&eacute;e X de d&eacute;but et de fin de la ligne horizontale
+pour chaque ligne Y. Pour cela, nous allons modifier notre algorithme de
+trac&eacute; de droite, mais au lieu de dessiner des points, nous allons
+stocker la coordonn&eacute;e x dans un tableau appropri&eacute;. Ensuite,
+nous n'aurons plus qu'&agrave; dessiner des lignes horizontales entre les
+coordonn&eacute;es X qui auront &eacute;t&eacute; stock&eacute;es (<A HREF="objet3.zip">objet3.zip</A>).</FONT>
+
+<P><FONT SIZE=+1>Nous avons donc besoin de 2 tableaux pour stocker les
+coordonn&eacute;es de d&eacute;part et de fin pour chaque ligne horizontale
+:</FONT>
+<UL>
+<UL>
+<UL>
+<UL><B><FONT SIZE=+1>int startx[200];</FONT></B>
+<BR><B><FONT SIZE=+1>int endx[200];</FONT></B></UL>
+</UL>
+</UL>
+</UL>
+<FONT SIZE=+1>Nous n'avons besoin que de 200 &eacute;l&eacute;ments puisque
+nous travaillons en mode 320*200 256 couleurs. Si vous changer de mode,vous
+devrez changer la taille de ces tableaux.</FONT>
+
+<P><FONT SIZE=+1>Avant de dessiner un polygone, les valeurs de ces tableaux
+sont initialis&eacute;es &agrave; des valeurs impossibles dans la r&eacute;alit&eacute;
+(j'utilise -16000, mais c'est totalement arbitraire).</FONT>
+
+<P><FONT SIZE=+1>Maintenant il faut modifier l'algorithme de trac&eacute;
+de droite, qui va stocker une valeur X pour chaque coordonn&eacute;e Y.
+Si la valeur contenue dans <B>startx[y] </B>vaut-16000, alors nous la stockons
+dans ce&nbsp;&nbsp; tableau, sinon cela signifie qu'une valeur y est d&eacute;j&agrave;
+pr&eacute;sente, et donc nous la mettons dans <B>endx[y]</B>. Ainsi il
+ne peut pas y avoir de perte d'information si notre algorithme est bien
+con&ccedil;u (je vous rassure, je pense que c'est le cas).</FONT>
+
+<P><FONT SIZE=+1>Voyons ce que cela donne concr&egrave;tement :</FONT>
+<PRE><FONT SIZE=+1>void InitSegment(int x1, int y1, int x2,int y2)
+{
+&nbsp; int temp,y;
+&nbsp; long x,pas;
+
+&nbsp; if(y2!=y1)
+&nbsp; {
+&nbsp;&nbsp;&nbsp; if(y2&lt;y1)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; temp=y1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; y1=y2;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; y2=temp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; temp=x1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x1=x2;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x2=temp;
+&nbsp;&nbsp;&nbsp; }
+
+&nbsp;&nbsp;&nbsp; x&nbsp; = x1&lt;&lt;8;
+&nbsp;&nbsp;&nbsp; pas= ((x2-x1)&lt;&lt;8)/(y2-y1);
+
+&nbsp;&nbsp;&nbsp; x+=pas;
+&nbsp;&nbsp;&nbsp; y1++;
+
+&nbsp;&nbsp;&nbsp; if(y1&lt;miny) miny=y1;
+&nbsp;&nbsp;&nbsp; if(y2>maxy) maxy=y2;
+
+&nbsp;&nbsp;&nbsp; for(y=y1;y&lt;=y2;y++)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if((y>=0) &amp;&amp; (y&lt;Ymax))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(startx[y]==-16000)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; startx[y]=x>>8;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; endx[y]=x>>8;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x+=pas;
+&nbsp;&nbsp;&nbsp; }
+&nbsp; }
+}</FONT></PRE>
+<FONT SIZE=+1>Pour acc&eacute;l&eacute;rer les calculs, nous travaillons
+en arithm&eacute;tique enti&egrave;re. En fait, nous utilisons des chiffres
+&agrave; virgule fixe. L'abscisse <B>X </B>est multipli&eacute;e par <B>256
+</B>et nous lui ajoutons &agrave; chaque &eacute;tape la valeur <B>pas</B>,
+qui est une constante. On ne calcule qu'une seule coordonn&eacute;e X par
+ligne Y.</FONT>
+
+<P><FONT SIZE=+1>Ce type de calcul en virgule fixe peut &ecirc;tre adapt&eacute;
+&agrave; l'assembleur de fa&ccedil;on tr&egrave;s efficace, et fournir
+un code d'une rapidit&eacute; assez &eacute;tonnante. Faites l'essai, le
+r&eacute;sultat en vaut le co&ucirc;t.</FONT>
+
+<P><FONT SIZE=+1>Du point de vue utilisateur, nous n'avons pas besoin d'appeler
+cette fonction. Pour remplir un polygone, nous devons lui passer en param&egrave;tre
+un pointeur sur un tableau de point, le nombre de points du polygone et
+la couleur &agrave; utiliser. Le reste est enti&egrave;rement g&eacute;r&eacute;
+par la fonction <B>FillPoly().</B> C'est elle qui fera appel &agrave; <B>InitSegment()</B>
+pour chacune des ar&ecirc;tes du polygone, et qui tracera les lignes horizontales.</FONT>
+<PRE><FONT SIZE=+1>void FillPoly(point *vertexlist, int numvertex, int color)
+{
+&nbsp; int i;
+&nbsp; point *curpt,*nextpt;
+
+&nbsp; miny=Ymax;
+&nbsp; maxy=0;
+
+&nbsp; /* On fait appel a InitSegment pour chaque ar&ecirc;te */</FONT></PRE>
+
+<PRE><FONT SIZE=+1>&nbsp; curpt&nbsp; = vertexlist;
+&nbsp; nextpt = vertexlist+1;
+
+&nbsp; for(i=1;i&lt;numvertex;i++)
+&nbsp; {
+&nbsp;&nbsp;&nbsp; InitSegment(curpt->x,curpt->y,nextpt->x,nextpt->y);
+&nbsp;&nbsp;&nbsp; curpt++;
+&nbsp;&nbsp;&nbsp; nextpt++;
+&nbsp; }
+
+&nbsp; nextpt = vertexlist;
+&nbsp; InitSegment(curpt->x,curpt->y,nextpt->x,nextpt->y);
+
+&nbsp; if(miny&lt;0) miny=0;
+&nbsp; if(maxy>=Ymax) maxy=Ymax-1;
+
+&nbsp; /* On trace les lignes horizontales */</FONT></PRE>
+
+<PRE><FONT SIZE=+1>&nbsp; for(i=miny;i&lt;=maxy;i++)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(endx[i]==-16000)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PutPixel(startx[i],i,color);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Hline(startx[i],endx[i],i,color);
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; startx[i]=endx[i]=-16000;
+&nbsp;&nbsp;&nbsp; }
+}</FONT></PRE>
+<FONT SIZE=+1>Au lieu de faire appel au trac&eacute; de droite classique,
+qui fonctionnerait parfaitement, il est pr&eacute;f&eacute;rable d'utiliser
+une fonction sp&eacute;cifique qui sera optimis&eacute;e. Il s'agit de
+la fonction Hline :</FONT>
+<PRE><FONT SIZE=+1>void Hline(int x1,int x2,int y, int color)
+{
+&nbsp; int x,offset;
+
+&nbsp; if (y&lt;0 || y>=Ymax) return;
+
+&nbsp; if(x1>x2)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x=x1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x1=x2;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x2=x;
+&nbsp;&nbsp;&nbsp; }
+
+&nbsp; offset=y*320+x1;
+
+&nbsp; for(x=x1;x&lt;=x2;x++)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(x>=0 &amp;&amp; x&lt;Xmax)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; screen[offset]=color;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; offset++;
+&nbsp;&nbsp;&nbsp; }
+}</FONT></PRE>
+<FONT SIZE=+1>Rien de plus simple en somme. Remarquez cependant que le
+test suivant</FONT>
+<CENTER><B><FONT SIZE=+1>if(x>=0 &amp;&amp; x&lt;Xmax)</FONT></B></CENTER>
+
+
+<P><FONT SIZE=+1>permet de r&eacute;aliser un clipping des plus primaires,
+mais efficace.</FONT>
+
+<P><FONT SIZE=+1>Voici un exemple d'utilisation de la fonction de remplissage
+de polygone :</FONT>
+<PRE><FONT SIZE=+1>void Remplir(face facette)
+
+{
+&nbsp; point p[3];
+
+&nbsp; p[0] = Point2D[facette.a];
+&nbsp; p[1] = Point2D[facette.b];
+&nbsp; p[2] = Point2D[facette.c];
+
+&nbsp; FillPoly(p,3,facette.couleur);
+}</FONT></PRE>
+<B><U><FONT SIZE=+2>2/ Les faces cach&eacute;es</FONT></U></B>
+
+<P><FONT SIZE=+1>Avant de remplir chacune des facettes de notre objet 3D,
+nous devons &eacute;liminer celles qui ne sont pas visibles par l'observateur.
+Dans le cas d'un objet convexe comme un cube ou une sph&egrave;re, cela
+sera satisfaisant (<A HREF="objet2.zip">objet2.zip</A>) . Pour des objets
+concaves, tels un tore ou le petit canard, il faudra en plus trier les
+facettes selon leur distance &agrave; l'observateur (<A HREF="objet3.zip">objet3.zip</A>).</FONT>
+
+<P><FONT SIZE=+1>&Eacute;tant donn&eacute; les restrictions que nous avons
+fait sur la position de l'observateur, il nous est facile de calculer la
+visibilit&eacute; d'une face. Il suffit en effet de tester le signe de
+sa normale Pour obtenir la normale d'une face, il faut faire ce que l'on
+appelle un produit vectoriel : on associe &agrave; deux vecteurs un troisi&egrave;me
+qui leur est perpendiculaire.</FONT>
+<CENTER><IMG SRC="vectoriel.gif" HEIGHT=120 WIDTH=300></CENTER>
+
+
+<P><FONT SIZE=+1>Voil&agrave; ce que cela donne en C :</FONT>
+<PRE><FONT SIZE=+1>int Visible(face f)
+{
+&nbsp; long a1,a2,b1,b2;
+
+&nbsp; a1 = Point2D[f.a].x - Point2D[f.b].x;
+&nbsp; b1 = Point2D[f.a].y - Point2D[f.b].y;
+&nbsp; a2 = Point2D[f.c].x - Point2D[f.b].x;
+&nbsp; b2 = Point2D[f.c].y - Point2D[f.b].y;
+
+&nbsp; if ((a1*b2-b1*a2)&lt;0) return 0;
+&nbsp; return 1;
+}</FONT></PRE>
+<FONT SIZE=+1>Il est possible d'&eacute;viter ce calcul en pr&eacute; calculant
+la normale &agrave; chaque facette, et &agrave; lui faire subir les m&ecirc;mes
+transformations qu'aux sommets (je pense aux rotations). Dans ce cas, il
+suffirait de tester le signe de la composante Z de la normale. Nous verrons
+comment faire lorsque l'on voudra illuminer nos objets.</FONT>
+
+<P><FONT SIZE=+1>En attendant, vous pouvez animer sans probl&egrave;me
+des objets convexes (<A HREF="objet2.c">objet2.zip</A>) Cela marche aussi
+avec des objets concaves (ex duck.asc) mais il y a des parties que l'on
+voit et qui devraient &ecirc;tre invisibles. Une seule solution : remplir
+les polygones, et les afficher par ordre d&eacute;croissant de leur distance
+&agrave; l'observateur. On pourra ainsi &eacute;liminer toutes les parties
+invisibles depuis le point d'observation (<A HREF="objet3.zip">objet3.zip</A>).</FONT>
+
+<P><B><U><FONT SIZE=+2>3/ Trier les facettes</FONT></U></B>
+
+<P><FONT SIZE=+1>Pour tirer nos facettes, nous devons rajouter une information
+suppl&eacute;mentaire : la distance de cette facette &agrave; l'observateur,
+qui sera dans notre cas la distance z moyenne de la facette.</FONT>
+<PRE><B><FONT SIZE=+1>typedef struct
+{
+&nbsp; int a,b,c;
+&nbsp; unsigned char couleur;&nbsp; /* couleur propre de la facette&nbsp; */
+&nbsp; double z;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* profonceur moyenne de la face */
+} face;
+
+</FONT></B><FONT SIZE=+1>point3D Sommet[1000];&nbsp;&nbsp;&nbsp;
+point3D Point3D[1000];&nbsp;&nbsp;
+point&nbsp;&nbsp; Point2D[1000];&nbsp;&nbsp;
+
+<B>face&nbsp;&nbsp;&nbsp; Facette[1000];&nbsp; /* les facettes de l'objet&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+int&nbsp;&nbsp;&nbsp;&nbsp; tri[1000];&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* tableau trie des facettes&nbsp;&nbsp;&nbsp; */
+
+</B>int&nbsp;&nbsp;&nbsp;&nbsp; Nb_points = 0;
+int&nbsp;&nbsp;&nbsp;&nbsp; Nb_faces&nbsp; = 0;
+<B>int&nbsp;&nbsp;&nbsp;&nbsp; Nb_visibles;&nbsp;&nbsp;&nbsp; /* pour connaitre le nombre de faces visibles */</B></FONT></PRE>
+<FONT SIZE=+1>Nous utiliserons &eacute;galement un tableau <B>tri[]</B>,
+qui contiendra l'indice des facettes class&eacute;es selon leur distance
+Z, ainsi qu'une variable Nb_visible pour conna&icirc;tre le nombre de facettes
+qui sont partiellement visibles. Pour afficher notre objet, la fonction
+utilis&eacute;e deviendra alors :</FONT>
+<PRE><FONT SIZE=+1>void Afficher(void)
+{
+&nbsp; int i;
+
+&nbsp; TrierFacettes();
+
+&nbsp; ClearBuffer();
+
+&nbsp; for(i=0;i&lt;Nb_visibles;i++)
+&nbsp;&nbsp;&nbsp; Remplir(Facette[tri[i]]);
+
+&nbsp; WaitVbl();
+&nbsp; ShowBuffer();
+}</FONT></PRE>
+<FONT SIZE=+1>Pour trier les facettes, nous avons besoin de conna&icirc;tre
+la profondeur moyenne de chacune des faces composant la sc&egrave;ne &agrave;
+afficher. Il suffit donc de faire la somme de chacune des 3 composantes
+Z de chaque sommet. Il est d'ailleurs inutile de diviser cette somme par
+3, cela ne changera rien pour le tri. Enfin, on tri le tableau des facettes
+<B>visibles </B>(pour ne pas afficher des facettes qui de toutes fa&ccedil;on
+seront totalement recouvertes). Personnellement, j'utilise un QuickSort
+pour sa rapidit&eacute; et sa simplicit&eacute;, mais vous pouvez utiliser
+votre proc&eacute;dure de tri si cela vous chante.</FONT>
+<PRE><FONT SIZE=+1>void TrierFacettes(void)
+{
+&nbsp; int i;
+
+&nbsp; Nb_visibles=0;
+
+&nbsp; for(i=0;i&lt;Nb_faces;i++)
+&nbsp;&nbsp;&nbsp; if(visible(Facette[i]))
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Facette[i].z =&nbsp; Point3D[Facette[i].a].z
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + Point3D[Facette[i].b].z
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + Point3D[Facette[i].c].z;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tri[Nb_visibles]=i;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Nb_visibles++;
+&nbsp;&nbsp;&nbsp; }
+
+&nbsp; Quick_Sort(0,Nb_visibles-1);
+}</FONT></PRE>
+<FONT SIZE=+1>Toutes les sources et l'ex&eacute;cutable sont disponibles
+dans <A HREF="objet3.zip">objet3.zip</A>. Pour l'utiliser, vous pouvez
+taper par exemple :</FONT>
+<CENTER><B><FONT SIZE=+1>objet3 duck.asc</FONT></B></CENTER>
+
+<CENTER><IMG SRC="objet3.gif" HEIGHT=200 WIDTH=320></CENTER>
+
+<CENTER><I><FONT SIZE=+1>Objet en faces pleines</FONT></I></CENTER>
+
+
+<P><FONT SIZE=+1>Les facettes sont affich&eacute;es avec une couleur al&eacute;atoire
+qui est fix&eacute;e lors du chargement de l'objet contenu dans le fichier
+.ASC. Ce n'est pas tr&egrave;s joli, mais maintenant vous ma&icirc;trisez
+parfaitement la 3D, et c'est d&eacute;j&agrave; pas si mal !</FONT>
+<PRE><FONT SIZE=+1>/************************************************************************/
+/* Quick_Sort() : tri le tableau des facettes visibles&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+/************************************************************************/
+
+void Quick_Sort(int deb, int fin)
+{
+&nbsp; int&nbsp;&nbsp; i=deb;
+&nbsp; int&nbsp;&nbsp; j=fin;
+&nbsp; double milieu=Facette[tri[(deb+fin)/2]].z;
+&nbsp; int&nbsp;&nbsp; temp;
+
+&nbsp; while(i&lt;=j)
+&nbsp; {
+&nbsp;&nbsp;&nbsp; while(Facette[tri[i]].z > milieu) i++;
+&nbsp;&nbsp;&nbsp; while(Facette[tri[j]].z &lt; milieu) j--;
+
+&nbsp;&nbsp;&nbsp; if(i&lt;=j)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; temp=tri[i];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tri[i]=tri[j];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tri[j]=temp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i++; j--;
+&nbsp;&nbsp;&nbsp; }
+&nbsp; }
+
+&nbsp; if(i&lt;fin) Quick_Sort(i,fin);
+&nbsp; if(deb&lt;j) Quick_Sort(deb,j);
+}</FONT></PRE>
+<B><U><FONT SIZE=+2>4/ Technique du Z-Buffer</FONT></U></B>
+
+<P><FONT SIZE=+1>Le Z-Buffer a &eacute;t&eacute; d&eacute;velopp&eacute;
+par Catmul en 1974. C'est l'algorithme le plus simple pour dessiner une
+sc&egrave;ne tridimensionnelle contenant des faces cach&eacute;es. Son
+impl&eacute;mentation est tr&egrave;s simple, et consiste &agrave; avoir
+en plus du buffer image (endroit o&ugrave; l'on dessine notre sc&egrave;ne)
+un buffer du profondeur, appel&eacute; <B>Z-Buffer</B>. Ce tableau doit
+&ecirc;tre exactement de la m&ecirc;me taille que l'espace image, et va
+contenir pour chaque pixel la valeur Z associ&eacute;e.</FONT>
+
+<P><FONT SIZE=+1>Concr&egrave;tement, si l'on dessine le pixel de coordonn&eacute;es
+(x,y,z), dans notre espace image le pixel (x',y') sera allum&eacute; et
+la valeur z sera stock&eacute;e dans le Z-Buffer au m&ecirc;me emplacement.
+La plus grosse valeur Z qui sera autoris&eacute;e &agrave; &ecirc;tre stock&eacute;e
+sera ainsi la valeur du clipping en profondeur. Au commencement, note Z-Buffer
+est enti&egrave;rement initialis&eacute; &agrave; 0.</FONT>
+
+<P><FONT SIZE=+1>Lors du processus de remplissage d'un polygone, si le
+point (x,y) &agrave; dessiner est plus pr&egrave;s de l'observateur que
+le point pr&eacute;c&eacute;dent, alors on stocke ce point dans l'espace
+image, sinon on passe au pixel suivant.</FONT>
+
+<P><FONT SIZE=+1>Voici un pseudo-code en C qui pourrait correspondre &agrave;
+l'impl&eacute;mentation de cette technique :</FONT>
+<PRE><FONT SIZE=+1>void Z_Buffer()
+{
+&nbsp; int x,y;
+
+&nbsp; for(y=0;y&lt;YMAX;y++)
+&nbsp;&nbsp;&nbsp; for(x=0;x&lt;XMAX;x++)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PutPixel(x,y,COULEUR_DU_FOND);&nbsp;&nbsp;&nbsp; /* usuellement on met 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* consiste juste a vider l'ecran */
+
+&nbsp; for(chaque polygone)
+&nbsp;&nbsp;&nbsp; for(chaque point du polygone projete)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; double z = profondeur du pixel de coord (x,y) a l'ecran&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(z>LireZ(x,y))&nbsp;&nbsp;&nbsp;&nbsp; /* retourne la valeur du buffer Z en (x,y)&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; EcrireZ(x,y,z);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PutPixel(x,y,couleur);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;
+}</FONT></PRE>
+<FONT SIZE=+1>Nous n'avons &agrave; pr&eacute;sent plus besoin de trier
+nos objets pour appliquer cet algorithme. Je vous laisse le soin d'impl&eacute;menter
+cet algorithme. Un dernier point cependant. Nous pouvons am&eacute;liorer
+et simplifier le calcul de la valeur z de chaque point en s'appuyant sur
+le fait qu'on ne travaille qu'avec des polygones plats (c'est g&eacute;n&eacute;ralement
+le cas). Pour calculer la valeur z d'un point, nous devrions en principe
+r&eacute;soudre l'&eacute;quation du plan <B>Ax + By + Cz +D = 0</B>, soit
+pour z:</FONT>
+<CENTER><B><FONT SIZE=+1>z = (-D -Ax -By)/C</FONT></B></CENTER>
+
+
+<P><FONT SIZE=+1>Maintenant, si pour le point (x,y) nous avons trouv&eacute;
+pour z la valeur z1, au point (x+dx,y) nous aurons pour z:</FONT>
+<CENTER><B><FONT SIZE=+1>z1-(A/C)*dx</FONT></B></CENTER>
+
+
+<P><FONT SIZE=+1>A/C est constant, et dans notre algorithme de remplissage
+de polygone dx=1. On peut proc&eacute;der de m&ecirc;me pour avoir un calcul
+incr&eacute;mental sur y.</FONT>
+
+<P>
+<HR WIDTH="100%">
+
+<P><FONT SIZE=+1><A HREF="Plan3D.html">[Sommaire]</A> <A HREF="chap4.html">[Pr&eacute;c&eacute;dent]</A>
+<A HREF="chap6.html">[Suivant]</A> <A HREF="../accueil.html" TARGET="Contenu">[Home
+Page]</A></FONT>
+
+<P><FONT SIZE=+1>Page r&eacute;alis&eacute;e par <A HREF="../cv.html" TARGET="Contenu">Christophe
+Heulin.</A></FONT>
+<BR><FONT SIZE=+1>Renseignements, critiques, informations : <A HREF="mailto:heulin@multimania.com">heulin@multimania.com</A></FONT>
+</BODY>
+</HTML>

@@ -1,0 +1,415 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.03 [fr] (Win95; I) [Netscape]">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EF" VLINK="#000080" ALINK="#FF0000">
+
+<CENTER>
+<H1>
+<FONT COLOR="#000000">Repr&eacute;sentation d'un objet en 3D</FONT></H1></CENTER>
+&nbsp;
+
+<P><B><U><FONT SIZE=+2>1/ Le monde en 3 dimensions</FONT></U></B>
+
+<P><FONT SIZE=+1>Mod&eacute;liser un objet de la r&eacute;alit&eacute;
+revient a consid&eacute;rer ses coordonn&eacute;es spatiales. Aussi, dessiner
+un objet en 3D peut ne pas para&icirc;tre simple au premier abord. Selon
+le probl&egrave;me, les structures utilis&eacute;es peuvent diff&eacute;rer.
+Nous allons donc nous limiter &agrave; une seule repr&eacute;sentation,
+la plus intuitive et tr&egrave;s certainement la plus simple &agrave; mettre
+en oeuvre, qui est une repr&eacute;sentation hi&eacute;rarchique.</FONT>
+
+<P><FONT SIZE=+1>Nous allons travailler dans le rep&egrave;re cart&eacute;sien
+(O,X,Y,Z) qui sera notre espace image. Un objet 3D est caract&eacute;ris&eacute;
+par sa forme et sa position. La forme d'un objet est d&eacute;finie par
+un ensemble de facettes planes, et une face est logiquement d&eacute;finie
+par les coordonn&eacute;es de ses sommets. En g&eacute;n&eacute;ral, les
+coordonn&eacute;es sont exprim&eacute;es par rapport au centre de l'objet.
+Ce centre est utilis&eacute; comme centre de rotation de l'objet.</FONT>
+
+<P><FONT SIZE=+1>Ainsi, la position d'un objet dans notre espace image
+est d&eacute;finie d'une part par les coordonn&eacute;es de son centre,
+et d'autre part par son orientation dans l'espace. Ceci nous m&egrave;ne
+donc naturellement &agrave; utiliser un vecteur de translation (Xoff,Yoff,Zoff)
+et trois angles de rotation distincts (un pour chaque axe).</FONT>
+
+<P><FONT SIZE=+1>Pour d&eacute;terminer la position d'un objet, nous devons
+conna&icirc;tre les coordonn&eacute;es de chacun des sommets qui composent
+ses faces. En pratique, un m&ecirc;me sommet est commun &agrave; plusieurs
+faces. C'est pourquoi, afin de ne pas recalculer plusieurs fois les m&ecirc;mes
+coordonn&eacute;es, nous ne travaillons qu'avec des points. Au lieu d'avoir
+une liste de coordonn&eacute;es (x,y,z) pour repr&eacute;senter nos faces,
+nous n'aurons qu'une simple liste de num&eacute;ros r&eacute;f&eacute;ren&ccedil;ant
+les points de l'objet.</FONT>
+
+<P><B><U><FONT SIZE=+2>2/ Un exemple simple</FONT></U></B>
+
+<P><FONT SIZE=+1>Avant d'aller plus loin, prenons un des objets le plus
+&eacute;l&eacute;mentaire en 3D : le Cube. Pour un cube de cot&eacute;
+200 centr&eacute; sur l'origine, nous pouvons d&eacute;finir ses sommets
+de la mani&egrave;re suivante :</FONT>
+<BR>&nbsp;
+<CENTER><TABLE BORDER=2 CELLSPACING=0 CELLPADDING=0 >
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD>
+<CENTER><B><FONT SIZE=+1>Point #</FONT></B></CENTER>
+</TD>
+
+<TD>
+<CENTER><B><FONT SIZE=+1>X&nbsp;</FONT></B></CENTER>
+</TD>
+
+<TD>
+<CENTER><B><FONT SIZE=+1>Y&nbsp;</FONT></B></CENTER>
+</TD>
+
+<TD>
+<CENTER><B><FONT SIZE=+1>Z</FONT></B></CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><FONT SIZE=+1>0</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>-100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>-100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>-100</FONT></CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><FONT SIZE=+1>1</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>-100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>-100</FONT></CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><FONT SIZE=+1>2</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>-100</FONT></CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><FONT SIZE=+1>3</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>-100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>-100</FONT></CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><FONT SIZE=+1>4</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>-100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>100</FONT></CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><FONT SIZE=+1>5</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>-100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>-100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>100</FONT></CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><FONT SIZE=+1>6</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>-100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>100</FONT></CENTER>
+</TD>
+</TR>
+
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD>
+<CENTER><FONT SIZE=+1>7</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>100</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>100</FONT></CENTER>
+</TD>
+
+<TD ALIGN=CENTER VALIGN=CENTER>
+<CENTER><FONT SIZE=+1>100</FONT></CENTER>
+</TD>
+</TR>
+</TABLE></CENTER>
+<FONT SIZE=+1>Pour les faces, nous pouvons utiliser la structure suivante
+:</FONT>
+<BR>&nbsp;
+<CENTER><TABLE BORDER CELLSPACING=0 CELLPADDING=0 >
+<TR>
+<TD><B><FONT SIZE=+1>Nb de sommets</FONT></B></TD>
+
+<TD><B><FONT SIZE=+1>Liste des points</FONT></B></TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><FONT SIZE=+1>4</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>0,1,2,3</FONT></CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><FONT SIZE=+1>4</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>1,4,7,2</FONT></CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><FONT SIZE=+1>4</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>4,5,6,7</FONT></CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><FONT SIZE=+1>4</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>5,0,3,6</FONT></CENTER>
+</TD>
+</TR>
+
+<TR>
+<TD>
+<CENTER><FONT SIZE=+1>4</FONT></CENTER>
+</TD>
+
+<TD>
+<CENTER><FONT SIZE=+1>5,4,1,0</FONT></CENTER>
+</TD>
+</TR>
+
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD>
+<CENTER><FONT SIZE=+1>4</FONT></CENTER>
+</TD>
+
+<TD VALIGN=CENTER>
+<CENTER><FONT SIZE=+1>3,2,7,6</FONT></CENTER>
+</TD>
+</TR>
+</TABLE></CENTER>
+<FONT SIZE=+1>L'objet est d&eacute;finit comme ci-dessous :</FONT>
+<CENTER><IMG SRC="cube.gif" ALT="le cube en 3D" HEIGHT=200 WIDTH=320 ALIGN=CENTER></CENTER>
+
+
+<P><FONT SIZE=+1>Vous pouvez d&egrave;s &agrave; pr&eacute;sent remarquer
+que les num&eacute;ros des sommets sont donn&eacute;s de mani&egrave;re
+&agrave; d&eacute;crire chaque face dans un sens pr&eacute;cis. Dans notre
+exemple, lorsqu'on regarde une face, ses sommets sont num&eacute;rot&eacute;s
+dans le sens trigonom&eacute;trique.</FONT>
+
+<P><B><U><FONT SIZE=+2>3/ Un premier programme</FONT></U></B>
+
+<P><FONT SIZE=+1>Bien. Tout cela est bien joli, mais en pratique qu'est-ce
+que &ccedil;a donne ? Voici un petit programme qui ouvre un &eacute;cran
+graphique et qui affiche un cube en perspective (<A HREF="cube1.zip">cube1.zip</A>).
+Pour ce faire, nous utilisons une projection, qui est le seul moyen de
+repr&eacute;senter un objet 3D en 2D. Le principe sera expliqu&eacute;
+dans le chapitre suivant.</FONT>
+
+<P><FONT SIZE=+1>Avant toute chose, il faut d&eacute;finir les sommets
+du cube. On peut r&eacute;aliser cette op&eacute;ration de plusieurs mani&egrave;res,
+soit statiquement, soit dynamiquement. La structure utilis&eacute;e est
+des plus simples :</FONT>
+<PRE><FONT COLOR="#000000"><FONT SIZE=+1>typedef struct
+{
+&nbsp; double x,y,z;
+} Point;</FONT></FONT></PRE>
+<FONT SIZE=+1>Pour les sommets, nous pouvons les d&eacute;finir de la mani&egrave;re
+suivante :</FONT>
+<PRE><FONT COLOR="#000000"><FONT SIZE=+1>Point cube1[8];</FONT></FONT></PRE>
+<FONT SIZE=+1>puis faire appel &agrave; une fonction qui affectera une
+valeur a chacun de points :</FONT>
+<PRE><FONT SIZE=+1>void Initialiser(void)
+{
+&nbsp; cube1[0].x = -100;&nbsp; cube1[0].y = -100;&nbsp; cube1[0].z = -100;
+&nbsp; cube1[1].x =&nbsp; 100;&nbsp; cube1[1].y = -100;&nbsp; cube1[1].z = -100;
+&nbsp; cube1[2].x =&nbsp; 100;&nbsp; cube1[2].y =&nbsp; 100;&nbsp; cube1[2].z = -100;
+&nbsp; cube1[3].x = -100;&nbsp; cube1[3].y =&nbsp; 100;&nbsp; cube1[3].z = -100;
+&nbsp; cube1[4].x =&nbsp; 100;&nbsp; cube1[4].y = -100;&nbsp; cube1[4].z =&nbsp; 100;
+&nbsp; cube1[5].x = -100;&nbsp; cube1[5].y = -100;&nbsp; cube1[5].z =&nbsp; 100;
+&nbsp; cube1[6].x = -100;&nbsp; cube1[6].y =&nbsp; 100;&nbsp; cube1[6].z =&nbsp; 100;
+&nbsp; cube1[7].x =&nbsp; 100;&nbsp; cube1[7].y =&nbsp; 100;&nbsp; cube1[7].z =&nbsp; 100;
+}</FONT></PRE>
+<FONT SIZE=+1>Nous pouvons &eacute;galement initialiser les valeurs de
+chacune des coordonn&eacute;es lors de la d&eacute;claration du vecteur
+des sommets :</FONT>
+<PRE><FONT SIZE=+1>Point cube2[8]= { -100,-100,-100,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 100,-100,-100,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 100, 100,-100,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -100, 100,-100,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 100,-100, 100,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -100,-100, 100,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -100, 100, 100,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 100, 100, 100 };</FONT></PRE>
+<FONT SIZE=+1>Pour afficher tous les sommets de notre cube, nous devons
+transformer leurs coordonn&eacute;es 3D en coordonn&eacute;es 2D, ce qui
+revient &agrave; faire une projection. Le principe en est simple : il suffit
+de diviser les valeurs X et Y de chaque point par la troisi&egrave;me valeur
+Z.. Nous avons alors une <I>projection perspective. </I>Voici un petit
+sch&eacute;ma simple qui va vous &eacute;clairer l'esprit sur ce principe
+fondamental en 3D :</FONT>
+<CENTER><IMG SRC="perspec.gif" HEIGHT=200 WIDTH=320></CENTER>
+
+
+<P><FONT SIZE=+1>Vous constatez qu'il est simple de calculer la valeur
+de Y'. Il en est de m&ecirc;me pour X'. Si vous ne comprenez pas ce principe,
+reprenez vos cours de math de 4&egrave;me, c'est au programme !</FONT>
+
+<P><FONT SIZE=+1>En pratique, il est avantageux de choisir pour valeur
+de <B><I>d </I></B>une puissance de 2 : cela permet de remplacer une multiplication
+par un simple d&eacute;calage arithm&eacute;tique, beaucoup moins co&ucirc;teux
+en temps machine (m&ecirc;me si cette tendance dispara&icirc;t peu &agrave;
+peu). Voici une proc&eacute;dure C qui affiche chacun des points du cube
+en blanc :</FONT>
+<PRE><FONT SIZE=+1>void Sommet1(void)
+{
+&nbsp; int i;
+
+&nbsp; _setcolor(15);
+
+&nbsp; for (i=0;i&lt;8;i++)
+&nbsp; {
+&nbsp;&nbsp;&nbsp; _setpixel((cube1[i].x*256)/(cube1[i].z+Zoff)+Xoff,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (cube1[i].y*256)/(cube1[i].z+Zoff)+Yoff);
+&nbsp; }
+}</FONT></PRE>
+<FONT SIZE=+1>Si vous utilisez un autre compilateur que le Watcom C, vous
+devrez bien sur remplacer les instructions <I>_setcolor</I> et _<I>setpixel
+</I>par les fonctions similaires disponibles, ou bien encore par votre
+propres fonctions, comme nous le verrons plus tard.</FONT>
+
+<P><FONT SIZE=+1>Une mani&egrave;re bien plus visuelle d'afficher notre
+cube serait de le dessiner en fil de fer. Rien de plus simple : il suffit
+de tracer les ar&ecirc;tes entre les sommets projet&eacute;s sur le plan
+de l'&eacute;cran. En reprenant le sch&eacute;ma de notre cube, cela devient
+un jeu d'enfant :</FONT>
+<PRE><FONT SIZE=+1>void FilDeFer(void)
+{
+&nbsp;_setcolor(15);
+
+&nbsp;/* On affiche la face avant */
+&nbsp;ligne(0,1); ligne(1,2); ligne(2,3); ligne(3,0);
+
+&nbsp;/* Puis la face arriere */
+&nbsp;ligne(4,5); ligne(5,6); ligne(6,7); ligne(7,4);
+
+&nbsp;/* Et enfin les aretes restantes */
+&nbsp;ligne(0,5);
+&nbsp;ligne(1,4);
+&nbsp;ligne(2,7);
+&nbsp;ligne(3,6);
+}</FONT></PRE>
+<FONT SIZE=+1>Voil&agrave; pour notre premier programme consistant &agrave;
+afficher un objet 3D.</FONT>
+
+<P><FONT SIZE=+1>Vous pouvez retrouver les sources et l'ex&eacute;cutable
+ms-dos dans <A HREF="cube1.c">cube1.zip</A></FONT>
+
+<P>
+<HR WIDTH="100%">
+
+<P><FONT SIZE=+1><A HREF="Plan3D.html">[Sommaire]</A> <A HREF="chap1.html">[Pr&eacute;c&eacute;dent]</A>
+<A HREF="chap3.html">[Suivant]</A> <A HREF="../accueil.html" TARGET="Contenu">[Home
+Page]</A></FONT>
+
+<P><FONT SIZE=+1>Page r&eacute;alis&eacute;e par <A HREF="../cv.html" TARGET="Contenu">Christophe
+Heulin.</A></FONT>
+<BR><FONT SIZE=+1>Renseignements, critiques, informations : <A HREF="mailto:heulin@multimania.com">heulin@multimania.com</A></FONT>
+</BODY>
+</HTML>

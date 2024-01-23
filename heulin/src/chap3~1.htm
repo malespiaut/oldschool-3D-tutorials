@@ -1,0 +1,247 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.03 [fr] (Win95; I) [Netscape]">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EF" VLINK="#55188A" ALINK="#FF0000">
+
+<CENTER><B><FONT SIZE=+3>Les transformations g&eacute;om&eacute;triques</FONT></B></CENTER>
+&nbsp;
+
+<P><FONT SIZE=+1>La programmation en 3D est rarement limit&eacute;e &agrave;
+des objets immobiles, en particulier dans le domaine des d&eacute;mos.
+Tout mouvement peut se d&eacute;composer en une translation et une rotation,
+et dans le cas &eacute;ch&eacute;ant on peut inclure le changement d'&eacute;chelle.
+Les objets subissent donc un certain nombre de transformations g&eacute;om&eacute;triques,
+afin de donner une illusion de mouvement. Ces transformations ne sont pas
+tr&egrave;s compliqu&eacute;es d'un point de vue math&eacute;matiques,
+et elles sont de plus en plus c&acirc;bl&eacute;es sur de nombreux processeurs
+(par exemple sur les Silicon Graphics) mais il est tout de m&ecirc;me bon
+de les pr&eacute;senter clairement, car vous serez tr&egrave;s certainement
+amen&eacute; &agrave; les programmer.</FONT>
+
+<P><B><U><FONT SIZE=+2>1/ La translation</FONT></U></B>
+
+<P><FONT SIZE=+1>On appelle translation un d&eacute;placement simple dans
+une direction fixe. Elle est mat&eacute;rialis&eacute;e par une addition
+vectorielle, tout simplement. Par exemple, pour d&eacute;placer un point
+<B>P(x,y) </B>de <B><I>dx </I></B>unit&eacute;s selon l'axe des x et de
+<B><I>dy </I></B>unit&eacute;s par rapport &agrave; l'axe des y il suffit
+de faire :</FONT>
+<CENTER><B><FONT SIZE=+1>x' = x + dx</FONT></B></CENTER>
+
+<CENTER><B><FONT SIZE=+1>y' = y + dy</FONT></B></CENTER>
+
+
+<P><FONT SIZE=+1>Le point <B>P'(x',y')</B> sera donc le point obtenu par
+la translation de vecteur <B>T(dx,dy)</B>. En 3D, il suffit d'ajouter une
+dimension : le fonctionnement est strictement identique. En r&eacute;sum&eacute;,
+la translation peut s'&eacute;crire sous la forme :</FONT>
+<CENTER><B><FONT SIZE=+1>P' = P + T</FONT></B></CENTER>
+
+
+<P><FONT SIZE=+1>Pour d&eacute;placer un objet par une translation, il
+suffit d'appliquer la m&ecirc;me transformation &agrave; tous ses points.</FONT>
+
+<P><B><U><FONT SIZE=+2>2/ Le changement d'&eacute;chelle</FONT></U></B>
+
+<P><FONT SIZE=+1>On peut effectuer aussi facilement un changement d'&eacute;chelle
+sur un objet, ce qui permet de le "grossir" ou au contraire de le "r&eacute;tr&eacute;cir".
+Dans ce cas, il faut faire une multiplication de la forme :</FONT>
+<CENTER><B><FONT SIZE=+1>x' = sx * x</FONT></B></CENTER>
+
+<CENTER><B><FONT SIZE=+1>y' = sy * y</FONT></B></CENTER>
+
+
+<P><FONT SIZE=+1>Le point <B>P'(x',y')</B> sera le point obtenu par la
+multiplication du point <B>P</B> et de la matrice <B>S(sx,sy)</B>. On &eacute;crira
+donc <B>P'= S . P,</B> o&ugrave; S est une matrice du type :</FONT>
+<CENTER><IMG SRC="echelle.gif" HEIGHT=50 WIDTH=100></CENTER>
+
+
+<P><B><U><FONT SIZE=+2>3/ La rotation</FONT></U></B>
+
+<P><FONT SIZE=+1>Contrairement aux id&eacute;es re&ccedil;ues, les calculs
+de rotations ne sont pas tr&egrave;s compliqu&eacute;s, pour peu que l'on
+ait des vagues souvenirs de trigonom&eacute;trie et que l'on sache manipuler
+les matrices.</FONT>
+
+<P><FONT SIZE=+1>Pla&ccedil;ons-nous dans le plan avec l'exemple suivant
+:</FONT>
+<CENTER><IMG SRC="rotation.gif" ALT="rotation.gif" HEIGHT=200 WIDTH=320></CENTER>
+
+
+<P><FONT SIZE=+1>Nous avons ici une rotation d'angle a autour de l'origine.</FONT>
+<BR><FONT SIZE=+1>En supposant que les points A et B soient sur le cercle
+trigonom&eacute;trique (pour ceux qui aurait oubli&eacute; : A(1,0) et
+B(0,1)), nous avons clairement :</FONT>
+<CENTER><B><FONT SIZE=+1>x<SUB>A' </SUB>=<SUB> </SUB>cos(a)&nbsp;&nbsp;
+</FONT></B><FONT SIZE=+1>et<B>&nbsp;&nbsp; x<SUB>B' </SUB>= -sin(a)</B></FONT></CENTER>
+
+<CENTER><B><FONT SIZE=+1>y<SUB>A' </SUB>= sin(a)&nbsp;&nbsp; </FONT></B><FONT SIZE=+1>et&nbsp;&nbsp;&nbsp;<B>
+y<SUB>B' </SUB>=&nbsp; cos(a)</B></FONT></CENTER>
+
+
+<P><FONT SIZE=+1>Cette op&eacute;ration n'est autre qu'un calcul matriciel,
+et vous devez certainement savoir comment l'effectuer. La rotation matrice
+de la <B>rotation R</B> d'angle <B>a</B> est donc :</FONT>
+<CENTER><IMG SRC="matrice2d.gif" HEIGHT=100 WIDTH=170></CENTER>
+
+
+<P><FONT SIZE=+1>On peut maintenant g&eacute;n&eacute;raliser le probl&egrave;me
+&agrave; tous les points du plan en utilisant cette matrice R. La rotation
+d'un point P autour de l'origine devient alors :</FONT>
+<UL>
+<CENTER><B><FONT SIZE=+1>x'&nbsp; =&nbsp; x.cos(a)&nbsp; -&nbsp; y.sin(a)</FONT></B></CENTER>
+
+<CENTER><B><FONT SIZE=+1>y'&nbsp; =&nbsp; x.sin(a)&nbsp; +&nbsp; y.cos(a)</FONT></B></CENTER>
+</UL>
+<FONT SIZE=+1>Pour passer en 3D, rien de plus facile : il suffit d'ajouter
+une dimension &agrave; notre matrice. Dans une rotation, il est important
+de distinguer les axes concern&eacute;s ; aussi nous allons voir la matrice
+associ&eacute;e &agrave; la rotation autour de chaque axe. Commen&ccedil;ons
+par la rotation autour de l'axe des X : il est clair que nous pouvons d&eacute;duire
+la matrice &agrave; partir de celle que nous venons de voir. Il suffit
+pour cela d'observer que la rotation autour de l'axe des X ne modifiera
+pas les composantes X des coordonn&eacute;es du point consid&eacute;r&eacute;
+(o&ugrave; de l'objet).</FONT>
+
+<P><FONT SIZE=+1>Voici l'allure qu'auront nos matrices pour une rotation
+respectivement autour des des axes X,Y et Z :</FONT>
+<BR>&nbsp;
+<CENTER><TABLE CELLSPACING=0 CELLPADDING=10 >
+<TR>
+<TD><IMG SRC="matrice3dx.gif" HEIGHT=150 WIDTH=200></TD>
+
+<TD><B><FONT SIZE=+1>x' = x</FONT></B>&nbsp;
+
+<P><B><FONT SIZE=+1>y' = y*cos(a) - z*sin(a)</FONT></B>&nbsp;
+
+<P><B><FONT SIZE=+1>z' = y*sin(a) + z*cos(a)</FONT></B></TD>
+</TR>
+
+<TR>
+<TD><IMG SRC="matrice3dy.gif" HEIGHT=150 WIDTH=200></TD>
+
+<TD><B><FONT SIZE=+1>x' = x*cos(a) + z*sin(a)</FONT></B>&nbsp;
+
+<P><B><FONT SIZE=+1>y' = y</FONT></B>&nbsp;
+
+<P><B><FONT SIZE=+1>z' = -x*sin(a) + z*cos(a)</FONT></B></TD>
+</TR>
+
+<TR>
+<TD><IMG SRC="matrice3dz.gif" HEIGHT=150 WIDTH=200></TD>
+
+<TD><B><FONT SIZE=+1>x' = x*cos(a) + y*sin(a)</FONT></B>&nbsp;
+
+<P><B><FONT SIZE=+1>y' = -x*sin(a) + y*cos(a)</FONT></B>&nbsp;
+
+<P><B><FONT SIZE=+1>z' = z</FONT></B></TD>
+</TR>
+</TABLE></CENTER>
+<FONT SIZE=+1>Voil&agrave; pour nos rotations. Mais, me direz-vous, pourquoi
+se promener avec 3 matrices, et non pas une seule ? En fait, le probl&egrave;me
+est un petit peu plus compliqu&eacute; que &ccedil;a, et l'on en reparlera
+un peu plus tard lorsque nous verrons les matrices homog&egrave;nes. On
+peut en effet n'avoir qu'une seule matrice : il suffit de les combiner
+entre elles. Il s'agit encore une fois d'un simple produit matriciel, mais
+je ne vous donnerez pas la formule, elle est trop longue pour tenir sur
+une seule ligne :o) Si vous etes courageux je vous laisse le soin de la
+trouver.</FONT>
+
+<P><FONT SIZE=+1>A ce niveau, vous pouvez d&eacute;j&agrave; r&eacute;aliser
+toutes les animations que vous voulez, puisque nous avons abord&eacute;
+toutes les bases math&eacute;matiques n&eacute;cessaires. Mais il nous
+reste encore un probl&egrave;me &agrave; r&eacute;soudre : comment afficher
+une objet repr&eacute;sent&eacute; en 3D sur un petit &eacute;cran tout
+plat qui ne compte lui que 2 dimensions ? Rassurez-vous, la solution est
+relativement simple, et si vous avez suivit jusque-l&agrave; cela ne vous
+causera en principe pas de probl&egrave;me particulier.</FONT>
+
+<P><B><U><FONT SIZE=+2>4/ La projection</FONT></U></B>
+
+<P><FONT SIZE=+1>Pour passer d'une dimension 3 &agrave; une dimension 2,
+il faut projeter les coordonn&eacute;es des sommets qui composent la sc&egrave;ne
+&agrave; visualiser. Il existe plusieurs types de projection : la <I>projection
+parall&egrave;le</I> et la <I>projection perspective.</I> La premi&egrave;re
+est utilis&eacute;e en architecture, alors que le seconde est utilis&eacute;e
+pour le rendu r&eacute;aliste, car elle rend compte des distances et donne
+v&eacute;ritablement une impression de profondeur &agrave; la sc&egrave;ne.
+C'est celle que nous avons vue dans le chapitre pr&eacute;c&eacute;dent,
+et que nous allons utiliser par la suite.</FONT>
+
+<P><FONT SIZE=+1>Dans ce cas de figure, le principe consiste &agrave; projeter
+les points sur un plan situ&eacute; devant le point d'observation. Reprenons
+notre petit sch&eacute;ma :</FONT>
+<CENTER><IMG SRC="perspec.gif" HEIGHT=200 WIDTH=320></CENTER>
+
+
+<P><FONT SIZE=+1>Vous constatez qu'il est simple de calculer la valeur
+de Y'. Il en est de m&ecirc;me pour X'. Il s'agit ici d'une formule simplifi&eacute;e
+pour nos besoins, et qui va s'av&eacute;rer tr&egrave;s rapide est efficace,
+mais qui risque de nous limiter. Donc si jamais vous avez besoin un jour
+d'un vrai formules de projection perspective, vous avez de la chance les
+voici :</FONT>
+<CENTER><B><FONT SIZE=+1>X' = Xo + Zo * (X-Xo) / (Zo-Z)</FONT></B></CENTER>
+
+<CENTER><B><FONT SIZE=+1>Y' = Yo + Zo * (Y-Yo) / (Zo-Z)</FONT></B></CENTER>
+
+
+<P><FONT SIZE=+1>Ces formules tiennent compte de la position de l'observateur,
+qui est situ&eacute; au point <B>O(Xo,Yo,Zo)</B>. En supposant que l'on
+ait Xo=Yo=0, on a l'oeil qui est situ&eacute; quelque par sur l'axe des
+Z, et l'on retombe sur les formules pr&eacute;c&eacute;dentes. C'est une
+petite optimisation qui simplifie la vie des d&eacute;butants, mais qui
+n'est pas valable dans le cas g&eacute;n&eacute;ral.</FONT>
+
+<P><FONT SIZE=+1>Comme vous l'avez certainement constat&eacute;, le dessin
+en 2D n'est pas r&eacute;ellement mon domaine de pr&eacute;dilection. Je
+ne vais donc pas vous faire de petit dessin pour illustrer mes formules,
+d'autant qu'elles sont compr&eacute;hensibles.</FONT>
+
+<P><B><U><FONT SIZE=+2>5/ Les coordonn&eacute;es homog&egrave;nes</FONT></U></B>
+
+<P><FONT SIZE=+1>Les coordonn&eacute;es homog&egrave;nes sont utilis&eacute;es
+en synth&egrave;se d'image afin d'unifier le traitement des transformations
+g&eacute;om&eacute;triques d'une sc&egrave;ne et de les regrouper dans
+une seule matrice. En effet, si l'on utilise une matrice 2*2 pour les sc&egrave;nes
+bidimensionnelles et une matrice 3*3 pour les sc&egrave;nes tridimensionnelles,
+ces matrices ne peuvent exprimer que des rotations.</FONT>
+
+<P><FONT SIZE=+1>Pour exprimer aussi les translations, les changements
+d'&eacute;chelle et les projections, on va utiliser des matrices 4*4 pour
+les sc&egrave;nes tridimensionnelles.</FONT>
+
+<P><FONT SIZE=+1>Ainsi, si (x,y,z) sont les coordonn&eacute;es d'un point
+de la sc&egrave;ne &agrave; transformer et M<SUB>H</SUB> la matrice 4*4
+de coordonn&eacute;es homog&egrave;nes, on effectuera la multiplication
+:</FONT>
+<CENTER><B><FONT SIZE=+1>M<SUB>H</SUB> * [ x y z 1 ]</FONT></B></CENTER>
+
+
+<P><FONT SIZE=+1>ce qui donnera comme r&eacute;sultat [ X Y Z H ].</FONT>
+
+<P><FONT SIZE=+1>Les coordonn&eacute;es du point transform&eacute; seront
+alors (X/H , Y/H , Z/H).</FONT>
+
+<P><FONT SIZE=+1>La matrice 4*4 des coordonn&eacute;es homog&egrave;nes
+peut &ecirc;tre consid&eacute;r&eacute;e comme &eacute;tant compos&eacute;e
+de 4 sous-matrices, chacune d'elle &eacute;tant associ&eacute;e &agrave;
+un type de transformation.</FONT>
+<CENTER><IMG SRC="homogene.gif" HEIGHT=250 WIDTH=400></CENTER>
+
+
+<P>
+<HR WIDTH="100%">
+
+<P><FONT SIZE=+1><A HREF="Plan3D.html">[Sommaire]</A> <A HREF="chap2.html">[Pr&eacute;c&eacute;dent]</A>
+<A HREF="chap4.html">[Suivant]</A> <A HREF="../accueil.html" TARGET="Contenu">[Home
+Page]</A></FONT>
+
+<P><FONT SIZE=+1>Page r&eacute;alis&eacute;e par <A HREF="../cv.html" TARGET="Contenu">Christophe
+Heulin.</A></FONT>
+<BR><FONT SIZE=+1>Renseignements, critiques, informations : <A HREF="mailto:heulin@multimania.com">heulin@multimania.com</A></FONT>
+<BR>&nbsp;
+</BODY>
+</HTML>

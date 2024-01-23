@@ -1,0 +1,417 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.03 [fr] (Win95; I) [Netscape]">
+   <META NAME="Author" CONTENT="Christophe Heulin">
+   <TITLE>chap6</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EF" VLINK="#55188A" ALINK="#FF0000">
+
+<CENTER><B><FONT SIZE=+3>Les mod&egrave;les d'illumination</FONT></B></CENTER>
+&nbsp;
+
+<P><FONT SIZE=+1>Maintenant que nous pouvons remplir les faces de nos objets,
+il serait int&eacute;ressant de leur donner un aspect un peu plus r&eacute;aliste.
+La mani&egrave;re la plus simple est d'introduire une source lumineuse
+dans la sc&egrave;ne. Il existe plusieurs m&eacute;thodes, certaines &eacute;tant
+tr&egrave;s efficaces. Je vais vous pr&eacute;senter ici des mani&egrave;res
+simplifi&eacute;es d'impl&eacute;menter ces techniques <B>en local</B>
+(en global, il faudrait prendre en compte la contribution de chaque point).
+Pour en savoir plus, n'h&eacute;sitez pas &agrave; lire "Computer Graphics,
+principles and practice" de chez Addison-Wesley. Je crois qu'il existe
+une &eacute;dition fran&ccedil;aise pour &eacute;tudiants, mais qui est
+moins compl&egrave;te (le titre ? "Initiation &agrave; l'infographie",
+mais avec r&eacute;serves...)</FONT>
+
+<P><FONT SIZE=+1>Dans le cadre g&eacute;n&eacute;ral, il faudrait pour
+bien faire utiliser la formule suivante :</FONT>
+<CENTER><B><FONT SIZE=+1>L(P,V) = somme ( S(P,V,Vi) L(P,-Vi) )</FONT></B></CENTER>
+
+
+<P><B><U><FONT SIZE=+2>1/ Le mod&egrave;le de Lambert (Flat)</FONT></U></B>&nbsp;<IMG SRC="duck_anim2.gif" HEIGHT=40 WIDTH=40 ALIGN=ABSCENTER>
+
+<P><FONT SIZE=+1>Il s'agit sans aucun doute du mod&egrave;le d'illumination
+le plus simple qui soit. Le principe consiste &agrave; placer dans la sc&egrave;ne
+une source lumineuse situ&eacute;e &agrave; l'infini, et &eacute;clairant
+ainsi uniform&eacute;ment chaque point d'une facette (<A HREF="flat.zip">flat.zip</A>).
+Ainsi, chacune des faces composant l'objet sera dessin&eacute;e avec une
+couleur unique. Ce mod&egrave;le est donc tr&egrave;s simple &agrave; mettre
+en oeuvre et extr&ecirc;mement rapide.</FONT>
+<CENTER><IMG SRC="flat.gif" HEIGHT=200 WIDTH=320></CENTER>
+
+<CENTER><I><FONT SIZE=+1>Toujours le canard, en mod&egrave;le flat</FONT></I></CENTER>
+
+
+<P><FONT SIZE=+1>Avant d'aller plus loin, vous devez savoir ce qu'est un
+produit scalaire de 2 vecteurs. Pour les nuls en math (pleurez pas c'est
+pas si grave) je vais faire un petit rappel. Le produit scalaire est une
+op&eacute;ration qui multiplie 2 vecteurs entre eux, et qui donne pour
+r&eacute;sultat un scalaire (un nombre). On peut &eacute;crire cette op&eacute;ration
+sous 2 formes :</FONT>
+<CENTER><IMG SRC="scalaire.gif" HEIGHT=200 WIDTH=300></CENTER>
+
+
+<P><FONT SIZE=+1>Ce calcul est appliqu&eacute; lorsqu'on veut d&eacute;terminer
+l'angle entre 2 vecteurs. Pour cela, il suffit de combiner les 2 &eacute;galit&eacute;s
+pour obtenir finalement :</FONT>
+<CENTER><IMG SRC="cosinus.gif" HEIGHT=150 WIDTH=250></CENTER>
+
+
+<P><FONT SIZE=+1>Ainsi, pour d&eacute;terminer la couleur d'une facette,
+il faut calculer la quantit&eacute; de lumi&egrave;re qui arrive sur cette
+face. Elle est proportionnelle &agrave; l'angle entre la normale et la
+source lumineuse. Plus le cosinus sera petit, plus la facette sera perpendiculaire
+&agrave; la lumi&egrave;re, et donc plus elle sera &eacute;clair&eacute;e.</FONT>
+
+<P><FONT SIZE=+1>La source lumineuse va &ecirc;tre fixe dans la sc&egrave;ne,
+mais il serait possible de la faire bouger. On pourrait par exemple la
+faire tourner autour de l'objet &agrave; &eacute;clairer, ce qui donne
+un effet assez joli. Elle est repr&eacute;sent&eacute;e en m&eacute;moire
+par un vecteur, que nous appellerons le vecteur lumi&egrave;re. Par exemple,
+si nous voulons que la lumi&egrave;re arrive d'en haut &agrave; gauche
+et du cot&eacute; de l'observateur, nous devrions d&eacute;finir ce vecteur
+ainsi :</FONT>
+<CENTER><FONT SIZE=+1>l<B>umiere.x = 10;</B></FONT></CENTER>
+
+<CENTER><B><FONT SIZE=+1>lumiere.y = 10;</FONT></B></CENTER>
+
+<CENTER><B><FONT SIZE=+1>lumiere.z = 10;</FONT></B></CENTER>
+
+
+<P><FONT SIZE=+1>En pratique, ce n'est pas tout &agrave; fait le cas. En
+fait, nous allons juste changer le signe de chacune des coordonn&eacute;es
+du vecteur. Ainsi, nous pourrons effectuer le produit scalaire entre ce
+vecteur et la normale de la surface &agrave; &eacute;clairer en toute tranquillit&eacute;.
+Mais on peut tr&egrave;s bien ne pas faire &ccedil;a, il faudra juste inverser
+l'angle obtenu par produit scalaire.</FONT>
+
+<P><FONT SIZE=+1>&Eacute;tant donn&eacute; que l'on a besoin de la normale
+de chaque facette, il va &ecirc;tre tr&egrave;s co&ucirc;teux de la recalculer
+&agrave; chaque nouvelle image. Il est possible de les pr&eacute;calculer
+une fois pour toute, et ensuite on n'aura qu'a leur faire subir la m&ecirc;me
+rotation que les sommets. La structure des facettes sera modifi&eacute;e
+dans cette optique :</FONT>
+<PRE><FONT SIZE=+1>typedef struct
+{
+&nbsp; int a,b,c;
+&nbsp; unsigned char couleur;
+&nbsp; double z;
+
+<B>&nbsp; /* On stocke les normales */
+&nbsp; float nx,ny,nz;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Vecteur normal de la face&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp; float nx2,ny2,nz2;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Vecteur normal aprŠs rotation&nbsp; */
+&nbsp; float norme;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* norme (invariable)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+</B>} face;</FONT></PRE>
+<FONT SIZE=+1>Pour obtenir la normale &agrave; une facette, nous avons
+d&eacute;j&agrave; vu qu'il suffisait d'effectuer un produit vectoriel
+avec 2 vecteurs appartenant &agrave; cette facette. Ces vecteurs, appel&eacute;s
+a et b dans la fonction suivante, sont facilement calculables : j'esp&egrave;re
+que vous comprenez comment faire !</FONT>
+<PRE><FONT SIZE=+1>void CalculerNormales()
+{
+&nbsp; int i;
+&nbsp; float a[3],b[3];
+
+&nbsp; for(i=0;i&lt;Nb_faces;i++)
+&nbsp; {
+&nbsp;&nbsp;&nbsp; a[0] = (Sommet[Facette[i].a].x-Sommet[Facette[i].b].x);
+&nbsp;&nbsp;&nbsp; a[1] = (Sommet[Facette[i].a].y-Sommet[Facette[i].b].y);
+&nbsp;&nbsp;&nbsp; a[2] = (Sommet[Facette[i].a].z-Sommet[Facette[i].b].z);
+
+&nbsp;&nbsp;&nbsp; b[0] = (Sommet[Facette[i].a].x-Sommet[Facette[i].c].x);
+&nbsp;&nbsp;&nbsp; b[1] = (Sommet[Facette[i].a].y-Sommet[Facette[i].c].y);
+&nbsp;&nbsp;&nbsp; b[2] = (Sommet[Facette[i].a].z-Sommet[Facette[i].c].z);
+
+
+&nbsp;&nbsp;&nbsp; /* produit vectoriel => normale … la face */
+
+&nbsp;&nbsp;&nbsp; Facette[i].nx = a[1]*b[2]-a[2]*b[1];
+&nbsp;&nbsp;&nbsp; Facette[i].ny = a[2]*b[0]-a[0]*b[2];
+&nbsp;&nbsp;&nbsp; Facette[i].nz = a[0]*b[1]-a[1]*b[0];
+
+&nbsp;&nbsp;&nbsp; Facette[i].norme = sqrt(&nbsp; Facette[i].nx*Facette[i].nx
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + Facette[i].ny*Facette[i].ny
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + Facette[i].nz*Facette[i].nz );
+&nbsp; }
+}</FONT></PRE>
+<FONT SIZE=+1>Il est important de noter que les rotations conservent les
+distances. Il est inutile de recalculer la norme du vecteur normal &agrave;
+chaque fois, ca sera toujours la m&ecirc;me chose.</FONT>
+
+<P><FONT SIZE=+1>Ensuite, il suffit de leur appliquer la m&ecirc;me rotation
+qu'aux sommets de l'objet. Voici ce que devient alors notre fonction de
+rotation :</FONT>
+<PRE><FONT SIZE=+1>void Rotation(int Xa, int Ya, int Za)
+{
+&nbsp; int i;
+
+&nbsp; /* Calcul de la matrice de rotation 3*3 */
+
+&nbsp; matrice[0][0] = Cos[Za]*Cos[Ya];
+&nbsp; matrice[1][0] = Sin[Za]*Cos[Ya];
+&nbsp; matrice[2][0] = -Sin[Ya];
+
+&nbsp; matrice[0][1] = Cos[Za]*Sin[Ya]*Sin[Xa] - Sin[Za]*Cos[Xa];
+&nbsp; matrice[1][1] = Sin[Za]*Sin[Ya]*Sin[Xa] + Cos[Xa]*Cos[Za];
+&nbsp; matrice[2][1] = Sin[Xa]*Cos[Ya];
+
+&nbsp; matrice[0][2] = Cos[Za]*Sin[Ya]*Cos[Xa] + Sin[Za]*Sin[Xa];
+&nbsp; matrice[1][2] = Sin[Za]*Sin[Ya]*Cos[Xa] - Cos[Za]*Sin[Xa];
+&nbsp; matrice[2][2] = Cos[Xa]*Cos[Ya];
+
+
+&nbsp; /* Rotation des sommets de l'objet */
+
+&nbsp; for(i=0;i&lt;Nb_points;i++)
+&nbsp; {
+&nbsp;&nbsp;&nbsp; Point3D[i].x =&nbsp;&nbsp; matrice[0][0]*Sommet[i].x
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + matrice[1][0]*Sommet[i].y
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + matrice[2][0]*Sommet[i].z;
+
+&nbsp;&nbsp;&nbsp; Point3D[i].y =&nbsp;&nbsp; matrice[0][1]*Sommet[i].x
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + matrice[1][1]*Sommet[i].y
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + matrice[2][1]*Sommet[i].z;
+
+&nbsp;&nbsp;&nbsp; Point3D[i].z =&nbsp;&nbsp; matrice[0][2]*Sommet[i].x
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + matrice[1][2]*Sommet[i].y
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + matrice[2][2]*Sommet[i].z;
+&nbsp; }
+
+&nbsp; for(i=0;i&lt;Nb_faces;i++)
+&nbsp; {
+&nbsp;&nbsp;&nbsp; Facette[i].nx2=&nbsp; matrice[0][0]*Facette[i].nx
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + matrice[1][0]*Facette[i].ny
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + matrice[2][0]*Facette[i].nz;
+
+&nbsp;&nbsp;&nbsp; Facette[i].ny2=&nbsp; matrice[0][1]*Facette[i].nx
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + matrice[1][1]*Facette[i].ny
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + matrice[2][1]*Facette[i].nz;
+
+&nbsp;&nbsp;&nbsp; Facette[i].nz2=&nbsp; matrice[0][2]*Facette[i].nx
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + matrice[1][2]*Facette[i].ny
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + matrice[2][2]*Facette[i].nz;
+&nbsp; }
+}</FONT></PRE>
+<FONT SIZE=+1>Maintenant il ne reste plus qu'&agrave; remplir la facette
+avec la bonne couleur. On peut le faire par exemple avec</FONT>
+<CENTER><PRE><B><FONT SIZE=+1>&nbsp; FillPoly(p,3,Facette[i].couleur+CalculIntensite(i));</FONT></B></PRE></CENTER>
+<FONT SIZE=+1>La fonction <B>CalculIntensite() </B>va simplement effectuer
+un produit scalaire entre la normale de la face et le vecteur lumi&egrave;re,
+et retourner une valeur enti&egrave;re. Avec une palette correctement pr&eacute;par&eacute;e,
+par exemple un d&eacute;grad&eacute;, le r&eacute;sultat est assez beau
+et relativement satisfaisant.</FONT>
+<PRE><FONT SIZE=+1>int CalculIntensite(int i)
+{
+&nbsp; int res;
+
+&nbsp; /* juste un petit produit scalaire => donne le cosinus (entre -1 et 1) */
+&nbsp; res= (Facette[i].nx2*lumiere[0]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; +Facette[i].ny2*lumiere[1]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; +Facette[i].nz2*lumiere[2])*31
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /(normelumiere*Facette[i].norme);
+
+&nbsp; if (res>0) return 32-res;
+&nbsp; else return 31;
+}</FONT></PRE>
+<FONT SIZE=+1>Vous retrouverez les sources d'un exemple dans <A HREF="flat.zip">flat.zip</A>.
+Il s'utilise comme les programmes pr&eacute;c&eacute;dents, mais vous pouvez
+vous amuser &agrave; changer la taille de l'objet en utilisant les touches
++ et -. Attention cependant, il n'y a pas de clipping sur Z.</FONT>
+
+<P><B><U><FONT SIZE=+2>2/ Un mod&egrave;le simplifi&eacute; de Gouraud</FONT></U></B>&nbsp;<IMG SRC="duck_anim.gif" HEIGHT=40 WIDTH=40 ALIGN=ABSCENTER>
+
+<P><FONT SIZE=+1>Ce mod&egrave;le, compl&egrave;tement empirique, s'appuie
+sur une interpolation de la couleur. Le principe est le suivant :</FONT>
+<UL>
+<LI>
+<FONT SIZE=+1>calcul des normales aux sommets des facettes</FONT></LI>
+
+<LI>
+<FONT SIZE=+1>calcul des couleurs aux sommets des facettes</FONT></LI>
+
+<LI>
+<FONT SIZE=+1>interpolation des couleurs</FONT></LI>
+</UL>
+
+<CENTER><IMG SRC="gouraud.gif" HEIGHT=200 WIDTH=320></CENTER>
+
+<CENTER><I><FONT SIZE=+1>Lissage des facettes en Gouraud (<A HREF="gouraud.zip">gouraud.zip</A>)</FONT></I></CENTER>
+
+
+<P><FONT SIZE=+1>La premi&egrave;re &eacute;tape peut vous choquer : votre
+esprit pertinent vous &agrave; certainement d&eacute;j&agrave; dit : "la
+normale d'un sommet ? &Ccedil;a va pas non, &ccedil;a existe pas !". Il
+ne s'agit pas d'une v&eacute;ritable normale, mais seulement d'une approximation.
+Pour calculer un tel vecteur, pas de panique, la m&eacute;thode utilis&eacute;e
+est la plus simple que l'on puisse trouver et ne demande aucune justification
+math&eacute;matique. Pour obtenir la normale d'un sommet, on va simplement
+faire la moyenne de toutes les normales des facettes qui contiennent ce
+sommet. Simple non ?</FONT>
+<PRE><FONT SIZE=+1>void CalculerNormales()
+{
+&nbsp; double a[3],b[3];
+&nbsp; double nx,ny,nz;
+&nbsp; int&nbsp;&nbsp;&nbsp; nb;
+&nbsp; int&nbsp;&nbsp;&nbsp; i,j;
+
+&nbsp; /* Calcul de la normale de chaque facette */</FONT></PRE>
+
+<PRE>&nbsp;&nbsp; /* ......&nbsp; */
+
+<FONT SIZE=+1>&nbsp; /* Calcul de la pseudo-normale pour chaque sommet&nbsp; */
+&nbsp; /* qui sera utilis&eacute;e pour le Gouraud (et le Phong) */
+&nbsp; /* Consiste a faire la moyenne des normales des&nbsp;&nbsp;&nbsp; */
+&nbsp; /* facettes qui contiennent le sommet trait&eacute;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+
+&nbsp; for(i=0;i&lt;Nb_points;i++)
+&nbsp; {
+&nbsp;&nbsp;&nbsp; nx=ny=nz=0;
+&nbsp;&nbsp;&nbsp; nb=0;
+
+&nbsp;&nbsp;&nbsp; for(j=0;j&lt;Nb_faces;j++)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (Facette[j].a==i || Facette[j].b==i || Facette[j].c==i)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nx+=Facette[j].nx;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ny+=Facette[j].ny;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nz+=Facette[j].nz;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nb++;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; }
+
+&nbsp;&nbsp;&nbsp; Sommet[i].nx=nx/nb;
+&nbsp;&nbsp;&nbsp; Sommet[i].ny=ny/nb;
+&nbsp;&nbsp;&nbsp; Sommet[i].nz=nz/nb;
+&nbsp;&nbsp;&nbsp; Sommet[i].norme = sqrt(&nbsp; Sommet[i].nx*Sommet[i].nx
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + Sommet[i].ny*Sommet[i].ny
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + Sommet[i].nz*Sommet[i].nz );
+&nbsp; }
+}</FONT></PRE>
+<FONT SIZE=+1>Nous pouvons maintenant passer &agrave; la deuxi&egrave;me
+&eacute;tape, le calcul de l'intensit&eacute; aux sommets. L&agrave; encore,
+pas de secret. Nous allons reprendre la formule utilis&eacute;e pour le
+"mod&egrave;le" de Lambert, mais au lieu d'utiliser la normale de la face,
+on va bien sur se servir de cette pseudo-normale que l'on vient de calculer.</FONT>
+
+<P><FONT SIZE=+1>Reste &agrave; pr&eacute;sent &agrave; interpoler nos
+couleurs. Nous savons d&eacute;j&agrave; comment interpoler les points
+entre les sommets pour ensuite remplir notre polygone. Faisons de m&ecirc;me
+pour les couleurs. Pour chaque ligne horizontale, il nous suffit de calculer
+le pas incr&eacute;mental &agrave; ajouter &agrave; notre couleur. Le code
+est pratiquement identique &agrave; la fonction de remplissage classique.</FONT>
+<PRE><FONT SIZE=+1>void HlineGouraud(int x1, int coul1, int x2, int coul2, int y)
+{
+&nbsp; long difx,pas;
+&nbsp; long nbcoul,couleur;
+&nbsp; long x;
+&nbsp; long indice;
+
+&nbsp; /* initialisations diverses ... */</FONT></PRE>
+
+<PRE>&nbsp;
+<B><FONT SIZE=+1>&nbsp; nbcoul&nbsp; = coul2-coul1+1;
+&nbsp; couleur = coul1&lt;&lt;8;
+&nbsp; pas&nbsp;&nbsp;&nbsp;&nbsp; = (nbcoul&lt;&lt;8)/difx;
+
+</FONT></B><FONT SIZE=+1>&nbsp; indice=y*320+x1;
+
+&nbsp; for(x=x1;x&lt;=x2;x++)
+&nbsp; {
+&nbsp;&nbsp;&nbsp; if(x>=0 &amp;&amp; x&lt;Xmax)
+&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp; s</B>creen[indice]=(<B>couleur>>8</B>);
+&nbsp;&nbsp;&nbsp; indice++;
+&nbsp;&nbsp;&nbsp; <B>couleur+=pas;
+</B>&nbsp; }
+}</FONT></PRE>
+<FONT SIZE=+1>Mais pour pouvoir faire &ccedil;a, nous devons conna&icirc;tre
+les couleurs au d&eacute;but et la fin de chaque ligne horizontale. Il
+faut commencer par stocker pour chaque sommet sa couleur. La d&eacute;finition
+d'un point va se trouver modifi&eacute;e :</FONT>
+<PRE><FONT SIZE=+1>typedef struct
+{
+&nbsp; int x,y;
+&nbsp; int couleur;
+} point;</FONT></PRE>
+<FONT SIZE=+1>Pour remplir un polygone, nous utilisons deux tableaux, <B>startx[]
+</B>et<B> endx[]</B>. Pour nos couleurs, nous allons utiliser &eacute;galement
+deux tableaux, <B>startcol[] </B>et <B>endcol[] </B>qui seront initialis&eacute;s
+en m&ecirc;me temps. En fait, il faut interpoler les couleurs entre les
+lignes de la m&ecirc;me mani&egrave;re qu'on interpole les coordonn&eacute;es
+x. Pour acc&eacute;l&eacute;rer les calculs, nous travaillerons encore
+une fois en virgule fixe.</FONT>
+<PRE><FONT SIZE=+1>void InitSegmentGouraud(point p1, point p2)
+{
+&nbsp; int temp,y;
+&nbsp; long x,pas;
+&nbsp; long coul,pacoul;
+
+&nbsp; /* initialisations .... */</FONT></PRE>
+
+<PRE><FONT SIZE=+1>&nbsp; x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = (long)p1.x&lt;&lt;8;
+&nbsp; pas&nbsp;&nbsp;&nbsp; = ((long)(p2.x-p1.x)&lt;&lt;8)/(long)(p2.y-p1.y);
+
+&nbsp; <B>coul&nbsp;&nbsp; = p1.couleur&lt;&lt;8;
+&nbsp; pacoul = ((long)(p2.couleur-p1.couleur)&lt;&lt;8)/(long)(p2.y-p1.y);
+
+</B>&nbsp; x+=pas;
+&nbsp; p1.y++;
+&nbsp; <B>coul+=pacoul;
+
+</B>&nbsp; if(p1.y&lt;miny) miny=p1.y;
+&nbsp; if(p2.y>maxy) maxy=p2.y;
+
+&nbsp; for(y=p1.y;y&lt;=p2.y;y++)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if((y>=0) &amp;&amp; (y&lt;200))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(startx[y]==-16000)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; startx[y]&nbsp;&nbsp; = x >> 8;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B>startcol[y] = coul >> 8;
+</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; endx[y]&nbsp;&nbsp; = x >> 8;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B>endcol[y] = coul >> 8;
+</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x&nbsp;&nbsp;&nbsp; += pas;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B>coul += pacoul;
+</B>&nbsp;&nbsp;&nbsp; }
+&nbsp; }
+}</FONT></PRE>
+<FONT SIZE=+1>Ce n'est pas plus compliqu&eacute; que &ccedil;a ! L'avantage
+de cette technique est qu'elle est vraiment tr&egrave;s rapide, et elle
+produit des images qui sont assez jolies (<A HREF="gouraud.zip">gouraud.zip</A>).
+Seulement ce n'est pas une m&eacute;thode d'&eacute;clairage r&eacute;aliste,
+et elle n'est pas stable (selon le sens de parcours employ&eacute; lors
+du remplissage, la couleur d'un point peut varier). Elle permet n&eacute;anmoins
+de lisser les facettes des objets, m&ecirc;me si certaines bandes peuvent
+appara&icirc;tre sur les ar&ecirc;tes.</FONT>
+
+<P><B><U><FONT SIZE=+2>3/ Le mod&egrave;le de Phong</FONT></U></B>
+
+<P><FONT SIZE=+1>Ce mod&egrave;le a &eacute;t&eacute; tr&egrave;s largement
+explor&eacute; par les programmeurs du monde entier, car il permet d'obtenir
+des images de tr&egrave;s bonne qualit&eacute;. Il permet en outre de reproduire
+aussi bien des objets au comportement diffus que des objets sp&eacute;culaires.
+En r&eacute;sum&eacute;, au lieu d'interpoler les couleurs comme Gouraud
+le fait, nous allons interpoler les normales. En utilisant une bonne fonction
+de calcul d'intensit&eacute; lumineuse (un peu plus &eacute;volu&eacute;e
+que celle que j'ai pr&eacute;sent&eacute;e dans ce cours) le r&eacute;sultat
+est vraiment tr&egrave;s satisfaisant et r&eacute;aliste.</FONT>
+
+<P>[Suite en cours de r&eacute;alisation... Merci de bien vouloir m'excuser]
+
+<P>
+<HR WIDTH="100%">
+
+<P><FONT SIZE=+1><A HREF="Plan3D.html">[Sommaire]</A> <A HREF="chap5.html">[Pr&eacute;c&eacute;dent]</A>
+[<A HREF="chap7.html">Suivant</A>] <A HREF="../accueil.html" TARGET="Contenu">[Home
+Page]</A></FONT>
+
+<P><FONT SIZE=+1>Page r&eacute;alis&eacute;e par <A HREF="../cv.html" TARGET="Contenu">Christophe
+Heulin.</A></FONT>
+<BR><FONT SIZE=+1>Renseignements, critiques, informations : <A HREF="mailto:heulin@multimania.com">heulin@multimania.com</A></FONT>
+</BODY>
+</HTML>

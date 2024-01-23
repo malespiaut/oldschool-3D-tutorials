@@ -1,0 +1,334 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.03 [fr] (Win95; I) [Netscape]">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EF" VLINK="#55188A" ALINK="#FF0000">
+
+<CENTER><B><FONT SIZE=+3>Les Textures ou Mapping</FONT></B></CENTER>
+&nbsp;
+
+<P><FONT SIZE=+1>Pour rendre les objets encore plus impressionnants, il
+est int&eacute;ressant de pouvoir ajouter des textures. Ce n'est pas forc&eacute;ment
+tr&egrave;s simple au premier abord, mais si vous avez compris comment
+faire du Gouraud, &ccedil;a ira beaucoup mieux.</FONT>
+
+<P><FONT SIZE=+1>Le but du mapping est bien sur de "coller" une image,
+que l'on appelle texture, sur un objet. Encore une fois il y a plusieurs
+techniques possibles, certaines &eacute;tant sp&eacute;cialement con&ccedil;ues
+pour la 3D, et int&eacute;grant la correction de perspective. La m&eacute;thode
+pr&eacute;sent&eacute;e ici est beaucoup plus na&iuml;ve, mais donne tout
+de m&ecirc;me des r&eacute;sultats. Les sources sont disponibles dans <A HREF="map.zip">map.zip</A>.</FONT>
+<CENTER><IMG SRC="map2.gif" HEIGHT=200 WIDTH=320></CENTER>
+
+<CENTER>Une sph&egrave;re mapp&eacute;e</CENTER>
+
+
+<P><B><U><FONT SIZE=+2>1/ Pr&eacute;parer les donn&eacute;es</FONT></U></B>
+
+<P><FONT SIZE=+1>L'id&eacute;e directrice est d'associer &agrave; chaque
+sommet de l'objet une coordonn&eacute;e (x,y) dans la texture &agrave;
+appliquer. Dans la (bonne) litt&eacute;rature, ces coordonn&eacute;es sont
+nomm&eacute;es U et V. Le plus dur &eacute;tant de calculer ces coordonn&eacute;es
+sur un objet complexe, nous allons utiliser les donn&eacute;es fournies
+par 3D Studio. Le modeleur de 3DS permet en effet d'appliquer des textures
+(encore heureux, mais encore faut-il savoir s'en servir), et il va fournir
+les valeurs de U et V dans le fichier au format .ASC.</FONT>
+
+<P><FONT SIZE=+1>La premi&egrave;re chose &agrave; faire est donc de modifier
+notre chargeur d'objet afin de prendre en compte ces nouvelles donn&eacute;es.
+Pour les stocker, nous devons modifier notre structure de donn&eacute;es.
+Voici celle qui sera utilis&eacute;e :</FONT>
+<PRE><FONT SIZE=+1>typedef struct
+{
+&nbsp; int x,y;
+&nbsp; int u,v;
+} pointMap;</FONT></PRE>
+<FONT SIZE=+1>Dans notre chargeur, il faut rajouter juste quelques petites
+instructions, mais c'est exactement la m&ecirc;me chose que pour lire les
+coordonn&eacute;es x,y et z.</FONT>
+<PRE><FONT SIZE=+1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while(chaine[i]!='U') i++;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i+=2;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; sscanf(chaine+i,"%f",&amp;u);
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while(chaine[i]!='V') i++;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i+=2;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; sscanf(chaine+i,"%f",&amp;v);
+
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp; Point2D[Nb_points].u=u*320;&nbsp;&nbsp; /* (U * largeur_texture) */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Point2D[Nb_points].v=v*200;&nbsp;&nbsp; /* (V * hauteur_texture) */</B></FONT></PRE>
+<FONT SIZE=+1>Il faut bien veiller &agrave; multiplier U et V par la largeur
+et la hauteur de la texture, car 3DS lui les normalise (entre 0 et 1).
+Personnellement, je place ces valeurs dans le tableau Point2D, d&eacute;clar&eacute;
+comme suit :</FONT>
+<PRE><B><FONT SIZE=+1>pointMap Point2D[1000]; /* les sommets apr&egrave;s projection */</FONT></B></PRE>
+<FONT SIZE=+1>tout simplement parce que ces donn&eacute;es sont invariables,
+et qu'ainsi je vais simplifier mon code, mais c'est une question de go&ucirc;t.</FONT>
+
+<P><FONT SIZE=+1>Pour remplir nos polygones, nous utilisions en plus de
+<B>startx </B>et <B>endx</B>, les tableaux <B>startcol </B>et <B>endcol</B>.
+Pour le mapping, nous n'allons pas utiliser les 2 derniers tableaux, sauf
+si vous voulez combiner Textures et Gouraud, mais l&agrave; je vous laisse
+faire (je ne vais pas vous m&acirc;cher tout le travail non plus). A la
+place nous allons avoir une jolie petite structure ce qui &eacute;vitera
+de se promener avec 4 tableaux diff&eacute;rents :</FONT>
+<PRE><FONT SIZE=+1>struct {
+&nbsp; int&nbsp;&nbsp; x1,y1;
+&nbsp; int&nbsp;&nbsp; x2,y2;
+} texturepoint[200];</FONT></PRE>
+<FONT SIZE=+1>x1 et y1 seront les coordonn&eacute;es du point de d&eacute;part
+dans la texture (pour la ligne trait&eacute;e), et x2 et y2 les coordonn&eacute;es
+de fin.</FONT>
+<CENTER><IMG SRC="texture.gif" HEIGHT=200 WIDTH=350></CENTER>
+
+
+<P><FONT SIZE=+1>En principe avec ce petit dessin vous avez d&eacute;j&agrave;
+du comprendre le principe du mapping.</FONT>
+
+<P><B><U><FONT SIZE=+2>2/ Initialiser le remplissage de polygone</FONT></U></B>
+
+<P><FONT SIZE=+1>Pour remplir un polygone, il faut interpoler les coordonn&eacute;es
+x entre les sommets, et ce pour chaque ligne y. Quand nous sommes pass&eacute;
+au Gouraud, nous avons en plus interpol&eacute; (en m&ecirc;me temps) les
+couleurs de d&eacute;but et de fin de chaque ligne horizontale. Pour les
+textures, il faudra <B>interpoler les coordonn&eacute;es U et V</B> entre
+les sommets. Le principe est donc maintenu, et ne constitue donc rien de
+nouveau.</FONT>
+
+<P><FONT SIZE=+1>La fonction initialisant le remplissage de polygone (appel&eacute;e
+pour chaque ar&ecirc;te de l'objet) va donc simplement &ecirc;tre adapt&eacute;e.
+Le texte en gras repr&eacute;sente ce qu'il y a de nouveau par rapport
+au remplissage classique :</FONT>
+<PRE><FONT SIZE=+1>void InitSegmentTexture(pointMap p1,pointMap p2)
+{
+&nbsp; int&nbsp; y;
+&nbsp; pointMap temp;
+&nbsp; long x,m;
+&nbsp; <B>long u,ustep,v,vstep;
+
+</B>&nbsp; if(p2.y!=p1.y)
+&nbsp; {
+&nbsp;&nbsp;&nbsp; if(p2.y&lt;p1.y)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; temp=p1; p1=p2; p2=temp;
+&nbsp;&nbsp;&nbsp; }
+
+&nbsp;&nbsp;&nbsp; x = (long)p1.x&lt;&lt;8;
+&nbsp;&nbsp;&nbsp; m = ((long)(p2.x-p1.x)&lt;&lt;8)/((long)(p2.y-p1.y));
+
+&nbsp;&nbsp;&nbsp; <B>u&nbsp;&nbsp;&nbsp;&nbsp; = (long)p1.u&lt;&lt;8;
+&nbsp;&nbsp;&nbsp; ustep = ((long)(p2.u-p1.u)&lt;&lt;8)/((long)(p2.y-p1.y));
+
+&nbsp;&nbsp;&nbsp; v&nbsp;&nbsp;&nbsp;&nbsp; = (long)p1.v&lt;&lt;8;
+&nbsp;&nbsp;&nbsp; vstep = ((long)(p2.v-p1.v)&lt;&lt;8)/((long)(p2.y-p1.y));
+
+</B>&nbsp;&nbsp;&nbsp; x+=m;
+&nbsp;&nbsp;&nbsp; p1.y++;
+&nbsp;&nbsp;&nbsp; <B>u+=ustep;v+=vstep;</B>&nbsp;&nbsp;&nbsp;&nbsp; /* important ! */
+
+&nbsp;&nbsp;&nbsp; if(p1.y&lt;miny) miny=p1.y;
+&nbsp;&nbsp;&nbsp; if(p2.y>maxy) maxy=p2.y;
+
+&nbsp;&nbsp;&nbsp; for(y=p1.y;y&lt;=p2.y;y++)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if((y>=0)&amp;(y&lt;Ymax))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(startx[y]==INFINI)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; startx[y]&nbsp;&nbsp;&nbsp; = x>>8;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B>tpoint[y].x1 = u>>8;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tpoint[y].y1 = v>>8;
+</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; endx[y]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = x>>8;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B>tpoint[y].x2 = u>>8;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tpoint[y].y2 = v>>8;
+</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x += m;
+&nbsp;&nbsp;&nbsp;&nbsp;<B>&nbsp; u += ustep;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; v += vstep;
+</B>&nbsp;&nbsp;&nbsp; }
+&nbsp; }
+}</FONT></PRE>
+<FONT SIZE=+1>Vu sous cet angle, ca semble bien simple n'est-ce pas ? Mais
+pourquoi n'y avez-vous pas pens&eacute; plus t&ocirc;t ? Bon ce n'est pas
+grave, &ccedil;a me donne l'impression d'&ecirc;tre utile :o)</FONT>
+<BR><FONT SIZE=+1>Je ne vais pas m'attarder en commentaires, je crois que
+tout a d&eacute;j&agrave; &eacute;t&eacute; dit dans les chapitres pr&eacute;c&eacute;dents.</FONT>
+
+<P><B><U><FONT SIZE=+2>3/ Appliquer la texture</FONT></U></B>
+
+<P><FONT SIZE=+1>C'est certainement la partie que vous pourrez le plus
+optimiser, mais je vous rassure le code que je fournit, m&ecirc;me s'il
+ne contient pas une goutte d'assembleur, est relativement efficace.</FONT>
+
+<P><FONT SIZE=+1>Maintenant que nous connaissons les coordonn&eacute;es
+U et V de d&eacute;part et de fin pour chaque ligne, il ne nous reste plus
+qu'&agrave; dessiner ces lignes. Encore une fois le mot magique en animation
+intervient : <B>interpolation </B>! &Ccedil;a risque de vous d&eacute;cevoir
+du fait de la grande simplicit&eacute;, mais il existe de meilleure m&eacute;thode.
+M'enfin celle-ci marche, alors si vous d&eacute;butez elle suffira largement.</FONT>
+
+<P><FONT SIZE=+1>En fait, pour chaque point de la scanline (ligne horizontale
+trait&eacute;e) il nous suffit de retrouver le point correspondant dans
+la texture. On l'obtient &agrave; partir des variables <B>xpos </B>et <B>ypos</B>,
+qui sont en fait les valeurs interpol&eacute;es de U et V de d&eacute;but
+et de fin.</FONT>
+
+<P><FONT SIZE=+1>Pour simplifier les choses, on suppose que la texture
+est rectangulaire (c'est g&eacute;n&eacute;ralement le cas, mais enfin
+il y a peut-&ecirc;tre des d&eacute;traqu&eacute;s pr&egrave;s &agrave;
+tout parmi vous).</FONT>
+
+<P><FONT SIZE=+1>Assez parl&eacute;, voil&agrave; le code :</FONT>
+<PRE><FONT SIZE=+1>void HlineTexture(int x1,int u1,int v1,int x2,int u2,int v2,&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; int y,char *texture)
+{
+&nbsp; long longueur;
+&nbsp; long deltax,deltay;
+&nbsp; long xincr,yincr;
+&nbsp; long xpos,ypos;
+&nbsp; int&nbsp; indice;
+&nbsp; long src;
+&nbsp; int&nbsp; x,temp;
+
+
+&nbsp; if(x1>x2)
+&nbsp; {
+&nbsp;&nbsp;&nbsp; temp=x1; x1=x2; x2=temp;
+&nbsp;&nbsp;&nbsp; temp=u1; u1=u2; u2=temp;
+&nbsp;&nbsp;&nbsp; temp=v1; v1=v2; v2=temp;
+&nbsp; }
+
+&nbsp; longueur=x2-x1+1;
+&nbsp; if(longueur>0)
+&nbsp; {
+&nbsp;&nbsp;&nbsp; deltax = u2-u1+1;
+&nbsp;&nbsp;&nbsp; deltay = v2-v1+1;
+
+&nbsp;&nbsp;&nbsp; indice = y*Xmax+x1;
+
+&nbsp;&nbsp;&nbsp; xincr=((long)(deltax)&lt;&lt;8)/(long)longueur;
+&nbsp;&nbsp;&nbsp; yincr=((long)(deltay)&lt;&lt;8)/(long)longueur;
+
+&nbsp;&nbsp;&nbsp; xpos=u1&lt;&lt;8;
+&nbsp;&nbsp;&nbsp; ypos=v1&lt;&lt;8;
+
+&nbsp;&nbsp;&nbsp; for(x=x1;x&lt;=x2;x++)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; src = (xpos>>8) + (ypos &amp; 0xFF00) + ((ypos &amp; 0xFF00)>>2);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; screen[indice++]=texture[src];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xpos+=xincr;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ypos+=yincr;
+&nbsp;&nbsp;&nbsp; }
+&nbsp; }
+}</FONT></PRE>
+&nbsp;
+
+<P><FONT SIZE=+1>Le calcul de <B>src </B>peut vous choquer, alors je vais
+vous expliquer : dans mon cas je suppose que la <B>texture est en 320*200</B>.
+Donc le point &agrave; acc&eacute;der se trouve &agrave; l'emplacement
+(V*320+U), soit (ypos/256)*320+(xpos*256). Pour calculer le terme (ypos/256)*320
+je pose un masque pour avoir V*256 sans la partie fractionnaire, et ensuite
+j'ajoute ypos>>2, soit en fait V*64. Donc V*64*V*256+U = V*320*U.</FONT>
+
+<P><FONT SIZE=+1>En pratique, je vous conseille d'utiliser des textures
+de 256*256, surtout si vous faites de l'assembleur. &Ccedil;a vous permettra
+d'optimiser pas mal votre code. A cela une explication bien simple : 256*256
+= 655536 = taille d'un segment.</FONT>
+
+<P><FONT SIZE=+1>Pour faire proprement, le calcul de src devrait etre :</FONT>
+<UL>
+<UL>
+<PRE><FONT SIZE=+1>src = (ypos>>8)*LARGEUR_TEXTURE + xpos>>8;</FONT></PRE>
+</UL>
+</UL>
+<FONT SIZE=+1>Si vous utilisez une texture 256*256, vous pourrez mettre
+&agrave; la place :</FONT>
+<UL>
+<UL>
+<PRE><FONT SIZE=+1>src = ypos + xpos>>8;</FONT></PRE>
+</UL>
+</UL>
+<FONT SIZE=+1>Surtout, n'oubliez pas de changer les valeurs lors du chargement
+de fichier ASC, lorsqu'on multiplie U et V par la largeur et la hauteur
+de la texture.</FONT>
+
+<P><B><U><FONT SIZE=+2>4/ La fonction de remplissage</FONT></U></B>
+
+<P><FONT SIZE=+1>Il n'y a rien de particulier qui change dans cette fonction,
+mais je n'ai pas r&eacute;sist&eacute; au plaisir de vous couvrir encore
+un peu plus de code. Il faut dire qu'en g&eacute;n&eacute;ral les programmeurs
+sont tr&egrave;s r&eacute;barbatifs &agrave; l'id&eacute;e de distribuer
+leurs sources librement. Encore heureux que le projet GNU existe...</FONT>
+<PRE><FONT SIZE=+1>void FillPolyTexture(pointMap *vertexlist, int numvertex, char *texture)
+{
+&nbsp; pointMap *curpt,*nextpt;
+&nbsp; int i;
+
+&nbsp; miny=200;
+&nbsp; maxy=0;
+
+&nbsp; if(miny&lt;0)&nbsp;&nbsp;&nbsp; miny=0;
+&nbsp; if(maxy>=200) maxy=199;
+
+&nbsp; curpt&nbsp; = vertexlist;
+&nbsp; nextpt = vertexlist+1;
+
+&nbsp; for(i=1;i&lt;numvertex;i++)
+&nbsp; {
+&nbsp;&nbsp;&nbsp; InitSegmentTexture(*curpt,*nextpt);
+&nbsp;&nbsp;&nbsp; curpt++;
+&nbsp;&nbsp;&nbsp; nextpt++;
+&nbsp; }
+
+&nbsp; nextpt = vertexlist;
+&nbsp; InitSegmentTexture(*curpt,*nextpt);
+
+&nbsp; for(i=miny;i&lt;=maxy;i++)
+&nbsp; {
+&nbsp;&nbsp;&nbsp; if(endx[i]==INFINI)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; endx[i]=startx[i];
+
+&nbsp;&nbsp;&nbsp;&nbsp; HlineTexture(startx[i],tpoint[i].x1,tpoint[i].y1,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; endx[i],&nbsp; tpoint[i].x2,tpoint[i].y2,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i,texture);
+
+&nbsp;&nbsp;&nbsp; startx[i]=endx[i]=INFINI;
+&nbsp; }
+}</FONT></PRE>
+<B><U><FONT SIZE=+2>5/ Un exemple</FONT></U></B>
+
+<P><FONT SIZE=+1>Fid&egrave;le &agrave; mon habitude, je vous ai pr&eacute;par&eacute;
+un petit exemple. J'ai essay&eacute; de faire mieux qu'un cube avec des
+images sur les bords, et j'ai donc tent&eacute; d'appliquer une texture
+sur une sph&egrave;re (<A HREF="map.zip">map.zip</A>). Pour &ccedil;a j'ai
+fait appel &agrave; 3D Studio (non non je l'ai pas chez moi, je suis pas
+un pirate ;-).</FONT>
+
+<P><FONT SIZE=+1>C'est alors que je me suis rendu compte que j'&eacute;tais
+mieux &agrave; programmer qu'&agrave; utiliser ce logiciel, parce que je
+n'ai pas r&eacute;ussi &agrave; mettre la texture comme je voulais. Ce
+cr&eacute;tin ne rejoint pas les extr&eacute;mit&eacute;s de la texture.
+Je vous jure ! Le fichier jupiter.asc de l'exemple le prouve. Essayez de
+le charger avec 3DS, et faites une animation (genre faire tourner la sph&egrave;re
+sur elle-m&ecirc;me). Eh bien oui, il y a une bande noire ! Cela se traduit
+donc forc&eacute;ment donc mon programme, mais le bug ne vient pas de moi.</FONT>
+<CENTER><IMG SRC="map1.gif" HEIGHT=200 WIDTH=320></CENTER>
+
+<CENTER><I><FONT SIZE=+1>La petite plan&egrave;te qui tourne, qui tourne...</FONT></I></CENTER>
+
+
+<P>
+<HR WIDTH="100%">
+
+<P><FONT SIZE=+1><A HREF="Plan3D.html">[Sommaire]</A> <A HREF="chap6.html">[Pr&eacute;c&eacute;dent]</A>
+[Suivant] <A HREF="../accueil.html" TARGET="Contenu">[Home Page]</A></FONT>
+
+<P><FONT SIZE=+1>Page r&eacute;alis&eacute;e par <A HREF="../cv.html" TARGET="Contenu">Christophe
+Heulin.</A></FONT>
+<BR><FONT SIZE=+1>Renseignements, critiques, informations : <A HREF="mailto:heulin@multimania.com">heulin@multimania.com</A></FONT>
+<BR>&nbsp;
+<BR>&nbsp;
+</BODY>
+</HTML>
