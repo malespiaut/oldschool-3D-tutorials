@@ -50,7 +50,7 @@ Pour les faces, nous pouvons utiliser la structure suivante :\
 
 L’objet est définit comme ci-dessous :
 
-![le cube en 3D](src/cube.gif){height="200" width="320" align="CENTER"}
+![le cube en 3D](src/cube.gif)
 
 Vous pouvez dès à présent remarquer que les numéros des sommets sont donnés de manière à décrire chaque face dans un sens précis.
 Dans notre exemple, lorsqu’on regarde une face, ses sommets sont numérotés dans le sens trigonométrique.
@@ -118,7 +118,7 @@ Le principe en est simple : il suffit de diviser les valeurs X et Y de chaque po
 Nous avons alors une *projection perspective*.
 Voici un petit schéma simple qui va vous éclairer l’esprit sur ce principe fondamental en 3D :
 
-![](src/perspec.gif){height="200" width="320"}
+![](src/perspec.gif)
 
 Vous constatez qu’il est simple de calculer la valeur de Y’.
 Il en est de même pour X’.
