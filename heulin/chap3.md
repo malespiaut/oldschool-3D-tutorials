@@ -34,16 +34,20 @@ Dans ce cas, il faut faire une multiplication de la forme :
 
 ```math
 x’ = sx \times x
+```
 
+```math
 y’ = sy \times y
 ```
 
-Le point **P’(x’,y’)** sera le point obtenu par la multiplication du
-point **P** et de la matrice **S(sx,sy)**.
-On écrira donc **P’= S .
-P,** où S est une matrice du type :
+Le point $`P’(x’,y’)`$ sera le point obtenu par la multiplication du point $`P`$ et de la matrice $`S(sx,sy)`$.
+On écrira donc $`P’= S \cdot P`$, où S est une matrice du type :
 
 ![](src/echelle.gif)
+
+```math
+ S = \begin{bmatrix} Sx & 0 \\ 0 & Sy \end{bmatrix}
+```
 
 ## La rotation
 
@@ -56,9 +60,13 @@ Plaçons-nous dans le plan avec l’exemple suivant :
 Nous avons ici une rotation d’angle a autour de l’origine.
 En supposant que les points A et B soient sur le cercle trigonométrique (pour ceux qui aurait oublié : A(1,0) et B(0,1)), nous avons clairement :
 
-**x~A’~ = cos(a)** et **x~B’~ = -sin(a)**
+```math
+x_{A’} = cos(a)** `et` **x_{B’} = -sin(a)
+```
 
-**y~A’~ = sin(a)** et **y~B’~ = cos(a)**
+```math
+y_{A’} = sin(a)** `et` **y_{B’} = cos(a)
+```
 
 Cette opération n’est autre qu’un calcul matriciel, et vous devez certainement savoir comment l’effectuer.
 La rotation matrice de la **rotation R** d’angle **a** est donc :
