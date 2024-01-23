@@ -70,40 +70,49 @@ On peut réaliser cette opération de plusieurs manières, soit statiquement, so
 La structure utilisée est des plus simples :
 
 ```C
-typedef struct
+typedef struct Point Point;
+struct Point
 {
-  double x,y,z;
-} Point;
+  double x;
+  double y;
+  double z;
+};
 ```
 
 Pour les sommets, nous pouvons les définir de la manière suivante :
 
-    Point cube1[8];
+```C
+Point cube1[8] = {0};
+```
 
 puis faire appel à une fonction qui affectera une valeur a chacun de points :
 
-    void Initialiser(void)
-    {
-      cube1[0].x = -100;  cube1[0].y = -100;  cube1[0].z = -100;
-      cube1[1].x =  100;  cube1[1].y = -100;  cube1[1].z = -100;
-      cube1[2].x =  100;  cube1[2].y =  100;  cube1[2].z = -100;
-      cube1[3].x = -100;  cube1[3].y =  100;  cube1[3].z = -100;
-      cube1[4].x =  100;  cube1[4].y = -100;  cube1[4].z =  100;
-      cube1[5].x = -100;  cube1[5].y = -100;  cube1[5].z =  100;
-      cube1[6].x = -100;  cube1[6].y =  100;  cube1[6].z =  100;
-      cube1[7].x =  100;  cube1[7].y =  100;  cube1[7].z =  100;
-    }
+```C
+void Initialiser(void)
+{
+  cube1[0].x = -100;  cube1[0].y = -100;  cube1[0].z = -100;
+  cube1[1].x =  100;  cube1[1].y = -100;  cube1[1].z = -100;
+  cube1[2].x =  100;  cube1[2].y =  100;  cube1[2].z = -100;
+  cube1[3].x = -100;  cube1[3].y =  100;  cube1[3].z = -100;
+  cube1[4].x =  100;  cube1[4].y = -100;  cube1[4].z =  100;
+  cube1[5].x = -100;  cube1[5].y = -100;  cube1[5].z =  100;
+  cube1[6].x = -100;  cube1[6].y =  100;  cube1[6].z =  100;
+  cube1[7].x =  100;  cube1[7].y =  100;  cube1[7].z =  100;
+}
+```
 
 Nous pouvons également initialiser les valeurs de chacune des coordonnées lors de la déclaration du vecteur des sommets :
 
-    Point cube2[8]= { -100,-100,-100,
-                       100,-100,-100,
-                       100, 100,-100,
-                      -100, 100,-100,
-                       100,-100, 100,
-                      -100,-100, 100,
-                      -100, 100, 100,
-                       100, 100, 100 };
+```C
+Point cube2[8]= { -100,-100,-100,
+                   100,-100,-100,
+                   100, 100,-100,
+                  -100, 100,-100,
+                   100,-100, 100,
+                  -100,-100, 100,
+                  -100, 100, 100,
+                   100, 100, 100 };
+```
 
 Pour afficher tous les sommets de notre cube, nous devons transformer leurs coordonnées 3D en coordonnées 2D, ce qui revient à faire une projection.
 Le principe en est simple : il suffit de diviser les valeurs X et Y de chaque point par la troisième valeur Z..
@@ -118,41 +127,45 @@ Si vous ne comprenez pas ce principe, reprenez vos cours de math de 4ème, c’e
 En pratique, il est avantageux de choisir pour valeur de ***d*** une puissance de 2 : cela permet de remplacer une multiplication par un simple décalage arithmétique, beaucoup moins coûteux en temps machine (même si cette tendance disparaît peu à peu).
 Voici une procédure C qui affiche chacun des points du cube en blanc :
 
-    void Sommet1(void)
-    {
-      int i;
+```C
+void Sommet1(void)
+{
+  int i;
 
-      _setcolor(15);
+  _setcolor(15);
 
-      for (i=0;i<8;i++)
-      {
-        _setpixel((cube1[i].x*256)/(cube1[i].z+Zoff)+Xoff,
-                  (cube1[i].y*256)/(cube1[i].z+Zoff)+Yoff);
-      }
-    }
+  for (i=0;i<8;i++)
+  {
+    _setpixel((cube1[i].x*256)/(cube1[i].z+Zoff)+Xoff,
+              (cube1[i].y*256)/(cube1[i].z+Zoff)+Yoff);
+  }
+}
+```
 
-Si vous utilisez un autre compilateur que le Watcom C, vous devrez bien sur remplacer les instructions *\_setcolor* et \_*setpixel* par les fonctions similaires disponibles, ou bien encore par votre propres fonctions, comme nous le verrons plus tard.
+Si vous utilisez un autre compilateur que le Watcom C, vous devrez bien sur remplacer les instructions `_setcolor()` et `_setpixel()` par les fonctions similaires disponibles, ou bien encore par votre propres fonctions, comme nous le verrons plus tard.
 
 Une manière bien plus visuelle d’afficher notre cube serait de le dessiner en fil de fer.
 Rien de plus simple : il suffit de tracer les arêtes entre les sommets projetés sur le plan de l’écran.
 En reprenant le schéma de notre cube, cela devient un jeu d’enfant :
 
-    void FilDeFer(void)
-    {
-     _setcolor(15);
+```C
+void FilDeFer(void)
+{
+  _setcolor(15);
 
-     /* On affiche la face avant */
-     ligne(0,1); ligne(1,2); ligne(2,3); ligne(3,0);
+  // On affiche la face avant
+  ligne(0,1); ligne(1,2); ligne(2,3); ligne(3,0);
 
-     /* Puis la face arriere */
-     ligne(4,5); ligne(5,6); ligne(6,7); ligne(7,4);
+  // Puis la face arriere
+  ligne(4,5); ligne(5,6); ligne(6,7); ligne(7,4);
 
-     /* Et enfin les aretes restantes */
-     ligne(0,5);
-     ligne(1,4);
-     ligne(2,7);
-     ligne(3,6);
-    }
+  // Et enfin les aretes restantes
+  ligne(0,5);
+  ligne(1,4);
+  ligne(2,7);
+  ligne(3,6);
+}
+```
 
 Voilà pour notre premier programme consistant à afficher un objet 3D.
 
