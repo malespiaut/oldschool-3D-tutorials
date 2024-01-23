@@ -17,11 +17,13 @@ x’ = x + dx
 y’ = y + dy
 ```
 
-Le point **P’(x’,y’)** sera donc le point obtenu par la translation de vecteur **T(dx,dy)**.
+Le point $`P’(x’,y’)`$ sera donc le point obtenu par la translation de vecteur $`T(dx,dy)`$.
 En 3D, il suffit d’ajouter une dimension : le fonctionnement est strictement identique.
 En résumé, la translation peut s’écrire sous la forme :
 
-**P’ = P + T**
+```math
+P’ = P + T
+```
 
 Pour déplacer un objet par une translation, il suffit d’appliquer la même transformation à tous ses points.
 
@@ -30,9 +32,11 @@ Pour déplacer un objet par une translation, il suffit d’appliquer la même tr
 On peut effectuer aussi facilement un changement d’échelle sur un objet, ce qui permet de le « grossir » ou au contraire de le « rétrécir ».
 Dans ce cas, il faut faire une multiplication de la forme :
 
-**x’ = sx \* x**
+```math
+x’ = sx \times x
 
-**y’ = sy \* y**
+y’ = sy \times y
+```
 
 Le point **P’(x’,y’)** sera le point obtenu par la multiplication du
 point **P** et de la matrice **S(sx,sy)**.
