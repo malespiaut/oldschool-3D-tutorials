@@ -199,7 +199,7 @@ Si $`(x1,y1)`$ sont les coordonnées du début du segment à afficher et $`(x2,y
 Dx = | x2 - x1 | \quad \text{et} \quad Dy = | y2 - y1 |
 ```
 
-Pour le moment, supposons que $`Dy < Dx`$ et que $`x1<x2`$.
+Pour le moment, supposons que $`Dy < Dx`$ et que $`x1 < x2`$.
 
 La pente du segment à afficher est donnée par $`\frac{Dy}{Dx}`$.
 La méthode utilisée consiste à allumer des points dans une seule direction, ici la direction $`x`$, et n’allumer de points dans la direction $`y`$ que si l’erreur entre la pente obtenue et la pente idéale dépasse un certain seuil.
