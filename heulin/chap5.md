@@ -205,11 +205,11 @@ Voici un exemple d’utilisation de la fonction de remplissage de polygone :
 void
 Remplir(face facette)
 {
-  point p[3];
-
-  p[0] = Point2D[facette.a];
-  p[1] = Point2D[facette.b];
-  p[2] = Point2D[facette.c];
+  point p[3] = {
+  [0] = Point2D[facette.a],
+  [1] = Point2D[facette.b],
+  [2] = Point2D[facette.c],
+  };
 
   FillPoly(p, 3, facette.couleur);
 }
@@ -252,15 +252,10 @@ Voilà ce que cela donne en C :
 int
 Visible(face f)
 {
-  long a1;
-  long a2;
-  long b1;
-  long b2;
-
-  a1 = Point2D[f.a].x - Point2D[f.b].x;
-  b1 = Point2D[f.a].y - Point2D[f.b].y;
-  a2 = Point2D[f.c].x - Point2D[f.b].x;
-  b2 = Point2D[f.c].y - Point2D[f.b].y;
+  long a1 = Point2D[f.a].x - Point2D[f.b].x;
+  long b1 = Point2D[f.a].y - Point2D[f.b].y;
+  long a2 = Point2D[f.c].x - Point2D[f.b].x;
+  long b2 = Point2D[f.c].y - Point2D[f.b].y;
 
   if ((a1 * b2 - b1 * a2) < 0)
   {
