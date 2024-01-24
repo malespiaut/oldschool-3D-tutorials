@@ -192,6 +192,28 @@ Il suffit en effet de tester le signe de sa normale Pour obtenir la normale d’
 
 ![](src/vectoriel.gif)
 
+```math
+\overrightarrow{a} \cdot \overrightarrow{b} =
+
+\begin{matrix}
+a1 \\ a2 \\ a3
+\end{matrix}
+
+\cdot
+
+\begin{matrix}
+b1 \\ b2 \\ b3
+\end{matrix}
+
+=
+
+\begin{matrix}
+a1 & a2 & a3
+\end{matrix}
+
+
+```
+
 Voilà ce que cela donne en C :
 
 ```C
