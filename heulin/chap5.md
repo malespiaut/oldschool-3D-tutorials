@@ -35,44 +35,59 @@ Ainsi il ne peut pas y avoir de perte d’information si notre algorithme est bi
 Voyons ce que cela donne concrètement :
 
 ```C
-    void InitSegment(int x1, int y1, int x2,int y2)
+void
+InitSegment(int x1, int y1, int x2, int y2)
+{
+  int temp;
+  int y;
+  long x;
+  long pas;
+
+  if (y2 != y1)
+  {
+    if (y2 < y1)
     {
-      int temp,y;
-      long x,pas;
+      temp = y1;
+      y1 = y2;
+      y2 = temp;
 
-      if(y2!=y1)
+      temp = x1;
+      x1 = x2;
+      x2 = temp;
+    }
+
+    x = x1 << 8;
+    pas = ((x2 - x1) << 8) / (y2 - y1);
+
+    x += pas;
+    y1++;
+
+    if (y1 < miny)
+    {
+      miny = y1;
+    }
+    if (y2 > maxy)
+    {
+      maxy = y2;
+    }
+
+    for (y = y1; y <= y2; y++)
+    {
+      if ((y >= 0) && (y < Ymax))
       {
-        if(y2<y1)
+        if (startx[y] == -16000)
         {
-          temp=y1;
-          y1=y2;
-          y2=temp;
-
-          temp=x1;
-          x1=x2;
-          x2=temp;
+          startx[y] = x >> 8;
         }
-
-        x  = x1<<8;
-        pas= ((x2-x1)<<8)/(y2-y1);
-
-        x+=pas;
-        y1++;
-
-        if(y1<miny) miny=y1;
-        if(y2>maxy) maxy=y2;
-
-        for(y=y1;y<=y2;y++)
+        else
         {
-          if((y>=0) && (y<Ymax))
-            if(startx[y]==-16000)
-              startx[y]=x>>8;
-            else
-              endx[y]=x>>8;
-          x+=pas;
+          endx[y] = x >> 8;
         }
       }
+      x += pas;
     }
+  }
+}
 ```
 
 Pour accélérer les calculs, nous travaillons en arithmétique entière.
@@ -88,79 +103,98 @@ Pour remplir un polygone, nous devons lui passer en paramètre un pointeur sur u
 Le reste est entièrement géré par la fonction `FillPoly()`. C’est elle qui fera appel à `InitSegment()` pour chacune des arêtes du polygone, et qui tracera les lignes horizontales.
 
 ```C
-    void FillPoly(point *vertexlist, int numvertex, int color)
+void
+FillPoly(point* vertexlist, int numvertex, int color)
+{
+  int i;
+  point* curpt;
+  point* nextpt;
+
+  miny = Ymax;
+  maxy = 0;
+
+  /* On fait appel a InitSegment pour chaque arête */
+
+  curpt = vertexlist;
+  nextpt = vertexlist + 1;
+
+  for (i = 1; i < numvertex; i++)
+  {
+    InitSegment(curpt->x, curpt->y, nextpt->x, nextpt->y);
+    curpt++;
+    nextpt++;
+  }
+
+  nextpt = vertexlist;
+  InitSegment(curpt->x, curpt->y, nextpt->x, nextpt->y);
+
+  if (miny < 0)
+  {
+    miny = 0;
+  }
+  if (maxy >= Ymax)
+  {
+    maxy = Ymax - 1;
+  }
+
+  // On trace les lignes horizontales
+
+  for (i = miny; i <= maxy; i++)
+  {
+    if (endx[i] == -16000)
     {
-      int i;
-      point *curpt,*nextpt;
-
-      miny=Ymax;
-      maxy=0;
-
-      /* On fait appel a InitSegment pour chaque arête */
-
-      curpt  = vertexlist;
-      nextpt = vertexlist+1;
-
-      for(i=1;i<numvertex;i++)
-      {
-        InitSegment(curpt->x,curpt->y,nextpt->x,nextpt->y);
-        curpt++;
-        nextpt++;
-      }
-
-      nextpt = vertexlist;
-      InitSegment(curpt->x,curpt->y,nextpt->x,nextpt->y);
-
-      if(miny<0) miny=0;
-      if(maxy>=Ymax) maxy=Ymax-1;
-
-      /* On trace les lignes horizontales */
-
-      for(i=miny;i<=maxy;i++)
-        {
-          if(endx[i]==-16000)
-            PutPixel(startx[i],i,color);
-          else
-            Hline(startx[i],endx[i],i,color);
-
-          startx[i]=endx[i]=-16000;
-        }
+      PutPixel(startx[i], i, color);
     }
+    else
+    {
+      Hline(startx[i], endx[i], i, color);
+    }
+
+    startx[i] = endx[i] = -16000;
+  }
+}
 ```
 
 Au lieu de faire appel au tracé de droite classique, qui fonctionnerait parfaitement, il est préférable d’utiliser une fonction spécifique qui sera optimisée.
 Il s’agit de la fonction `Hline()` :
 
 ```C
-    void Hline(int x1,int x2,int y, int color)
+void
+Hline(int x1, int x2, int y, int color)
+{
+  int x;
+  int offset;
+
+  if (y < 0 || y >= Ymax)
+  {
+    return;
+  }
+
+  if (x1 > x2)
+  {
+    x = x1;
+    x1 = x2;
+    x2 = x;
+  }
+
+  offset = y * 320 + x1;
+
+  for (x = x1; x <= x2; x++)
+  {
+    if (x >= 0 && x < Xmax)
     {
-      int x,offset;
-
-      if (y<0 || y>=Ymax) return;
-
-      if(x1>x2)
-        {
-          x=x1;
-          x1=x2;
-          x2=x;
-        }
-
-      offset=y*320+x1;
-
-      for(x=x1;x<=x2;x++)
-        {
-          if(x>=0 && x<Xmax)
-            screen[offset]=color;
-          offset++;
-        }
+      screen[offset] = color;
     }
+    offset++;
+  }
+}
 ```
 
 Rien de plus simple en somme.
 Remarquez cependant que le test suivant
 
 ```C
-if(x>=0 && x<Xmax)
+if (x >= 0 && x < Xmax)
 ```
 
 permet de réaliser un clipping des plus primaires, mais efficace.
@@ -168,17 +202,17 @@ permet de réaliser un clipping des plus primaires, mais efficace.
 Voici un exemple d’utilisation de la fonction de remplissage de polygone :
 
 ```C
-    void Remplir(face facette)
+void
+Remplir(face facette)
+{
+  point p[3];
 
-    {
-      point p[3];
+  p[0] = Point2D[facette.a];
+  p[1] = Point2D[facette.b];
+  p[2] = Point2D[facette.c];
 
-      p[0] = Point2D[facette.a];
-      p[1] = Point2D[facette.b];
-      p[2] = Point2D[facette.c];
-
-      FillPoly(p,3,facette.couleur);
-    }
+  FillPoly(p, 3, facette.couleur);
+}
 ```
 
 ## Les faces cachées
@@ -215,18 +249,25 @@ a1 \cdot b2 - a2 \cdot b1
 Voilà ce que cela donne en C :
 
 ```C
-    int Visible(face f)
-    {
-      long a1,a2,b1,b2;
+int
+Visible(face f)
+{
+  long a1;
+  long a2;
+  long b1;
+  long b2;
 
-      a1 = Point2D[f.a].x - Point2D[f.b].x;
-      b1 = Point2D[f.a].y - Point2D[f.b].y;
-      a2 = Point2D[f.c].x - Point2D[f.b].x;
-      b2 = Point2D[f.c].y - Point2D[f.b].y;
+  a1 = Point2D[f.a].x - Point2D[f.b].x;
+  b1 = Point2D[f.a].y - Point2D[f.b].y;
+  a2 = Point2D[f.c].x - Point2D[f.b].x;
+  b2 = Point2D[f.c].y - Point2D[f.b].y;
 
-      if ((a1*b2-b1*a2)<0) return 0;
-      return 1;
-    }
+  if ((a1 * b2 - b1 * a2) < 0)
+  {
+    return 0;
+  }
+  return 1;
+}
 ```
 
 Il est possible d’éviter ce calcul en pré calculant la normale à chaque facette, et à lui faire subir les mêmes transformations qu’aux sommets (je pense aux rotations).
@@ -243,43 +284,46 @@ On pourra ainsi
 Pour tirer nos facettes, nous devons rajouter une information supplémentaire : la distance de cette facette à l’observateur, qui sera dans notre cas la distance z moyenne de la facette.
 
 ```C
-    typedef struct
-    {
-      int a,b,c;
-      unsigned char couleur;  /* couleur propre de la facette  */
-      double z;               /* profonceur moyenne de la face */
-    } face;
+typedef struct
+{
+  int a;
+  int b;
+  int c;
+  unsigned char couleur; // couleur propre de la facette
+  double z;              // profonceur moyenne de la face
+} face;
 
-    point3D Sommet[1000];   
-    point3D Point3D[1000];  
-    point   Point2D[1000];  
+point3D Sommet[1000];
+point3D Point3D[1000];
+point Point2D[1000];
 
-    face    Facette[1000];  /* les facettes de l'objet      */
-    int     tri[1000];      /* tableau trie des facettes    */
+face Facette[1000]; // les facettes de l'objet
+int tri[1000];      // tableau trie des facettes
 
-    int     Nb_points = 0;
-    int     Nb_faces  = 0;
-    int     Nb_visibles;    /* pour connaitre le nombre de faces visibles */
+int Nb_points = 0;
+int Nb_faces = 0;
+int Nb_visibles; // pour connaitre le nombre de faces visibles
 ```
 
 Nous utiliserons également un tableau `tri[]`, qui contiendra l’indice des facettes classées selon leur distance Z, ainsi qu’une variable `Nb_visible` pour connaître le nombre de facettes qui sont partiellement visibles.
 Pour afficher notre objet, la fonction utilisée deviendra alors :
 
 ```C
-    void Afficher(void)
-    {
-      int i;
+void
+Afficher(void)
+{
+  TrierFacettes();
 
-      TrierFacettes();
+  ClearBuffer();
 
-      ClearBuffer();
+  for (size_t i = 0; i < Nb_visibles; i++)
+  {
+    Remplir(Facette[tri[i]]);
+  }
 
-      for(i=0;i<Nb_visibles;i++)
-        Remplir(Facette[tri[i]]);
-
-      WaitVbl();
-      ShowBuffer();
-    }
+  WaitVbl();
+  ShowBuffer();
+}
 ```
 
 Pour trier les facettes, nous avons besoin de connaître la profondeur moyenne de chacune des faces composant la scène à afficher.
@@ -289,25 +333,26 @@ Enfin, on tri le tableau des facettes **visibles** (pour ne pas afficher des fac
 Personnellement, j’utilise un QuickSort pour sa rapidité et sa simplicité, mais vous pouvez utiliser votre procédure de tri si cela vous chante.
 
 ```C
-    void TrierFacettes(void)
+void
+TrierFacettes(void)
+{
+  Nb_visibles = 0;
+
+  for (size_t i = 0; i < Nb_faces; i++)
+  {
+    if (visible(Facette[i]))
     {
-      int i;
+      Facette[i].z = Point3D[Facette[i].a].z
+                   + Point3D[Facette[i].b].z
+                   + Point3D[Facette[i].c].z;
 
-      Nb_visibles=0;
-
-      for(i=0;i<Nb_faces;i++)
-        if(visible(Facette[i]))
-        {
-          Facette[i].z =  Point3D[Facette[i].a].z
-                        + Point3D[Facette[i].b].z
-                        + Point3D[Facette[i].c].z;
-
-          tri[Nb_visibles]=i;
-          Nb_visibles++;
-        }
-
-      Quick_Sort(0,Nb_visibles-1);
+      tri[Nb_visibles] = i;
+      Nb_visibles++;
     }
+  }
+
+  Quick_Sort(0, Nb_visibles - 1);
+}
 ```
 
 Toutes les sources et l’exécutable sont disponibles dans [objet3.zip](src/objet3.zip).
@@ -323,34 +368,48 @@ Les facettes sont affichées avec une couleur aléatoire qui est fixée lors du 
 Ce n’est pas très joli, mais maintenant vous maîtrisez parfaitement la 3D, et c’est déjà pas si mal !
 
 ```C
-    /************************************************************************/
-    /* Quick_Sort() : tri le tableau des facettes visibles                  */
-    /************************************************************************/
+/************************************************************************/
+/* Quick_Sort() : tri le tableau des facettes visibles                  */
+/************************************************************************/
 
-    void Quick_Sort(int deb, int fin)
+void
+Quick_Sort(int deb, int fin)
+{
+  int i = deb;
+  int j = fin;
+  double milieu = Facette[tri[(deb + fin) / 2]].z;
+  int temp;
+
+  while (i <= j)
+  {
+    while (Facette[tri[i]].z > milieu)
     {
-      int   i=deb;
-      int   j=fin;
-      double milieu=Facette[tri[(deb+fin)/2]].z;
-      int   temp;
-
-      while(i<=j)
-      {
-        while(Facette[tri[i]].z > milieu) i++;
-        while(Facette[tri[j]].z < milieu) j--;
-
-        if(i<=j)
-        {
-          temp=tri[i];
-          tri[i]=tri[j];
-          tri[j]=temp;
-          i++; j--;
-        }
-      }
-
-      if(i<fin) Quick_Sort(i,fin);
-      if(deb<j) Quick_Sort(deb,j);
+      i++;
     }
+    while (Facette[tri[j]].z < milieu)
+    {
+      j--;
+    }
+
+    if (i <= j)
+    {
+      temp = tri[i];
+      tri[i] = tri[j];
+      tri[j] = temp;
+      i++;
+      j--;
+    }
+  }
+
+  if (i < fin)
+  {
+    Quick_Sort(i, fin);
+  }
+  if (deb < j)
+  {
+    Quick_Sort(deb, j);
+  }
+}
 ```
 
 ## Technique du Z-Buffer
@@ -369,25 +428,34 @@ Lors du processus de remplissage d’un polygone, si le point $`(x,y)`$ à dessi
 Voici un pseudo-code en C qui pourrait correspondre à l’implémentation de cette technique :
 
 ```C
-    void Z_Buffer()
+void
+Z_Buffer(void)
+{
+  int x;
+  int y;
+
+  for (y = 0; y < YMAX; y++)
+  {
+    for (x = 0; x < XMAX; x++)
     {
-      int x,y;
-
-      for(y=0;y<YMAX;y++)
-        for(x=0;x<XMAX;x++)
-          PutPixel(x,y,COULEUR_DU_FOND);    /* usuellement on met 0           */
-                                            /* consiste juste a vider l'ecran */
-
-      for(chaque polygone)
-        for(chaque point du polygone projete)
-          double z = profondeur du pixel de coord (x,y) a l'ecran           
-          if(z>LireZ(x,y))     /* retourne la valeur du buffer Z en (x,y)   
-            {
-              EcrireZ(x,y,z);
-              PutPixel(x,y,couleur);
-            }
-     
+      PutPixel(x, y, COULEUR_DU_FOND); // usuellement on met 0 
+                                       // consiste juste à vider l'écran
     }
+  }
+
+  for (chaque polygone)
+  {
+    for (chaque point du polygone projeté)
+    {
+      double z = profondeur du pixel de coord(x, y) a l'écran
+      if (z > LireZ(x, y)) // retourne la valeur du buffer Z en (x,y)
+      {
+        EcrireZ(x, y, z);
+        PutPixel(x, y, couleur);
+      }
+    }
+  }
+}
 ```
 
 Nous n’avons à présent plus besoin de trier nos objets pour appliquer cet algorithme.
