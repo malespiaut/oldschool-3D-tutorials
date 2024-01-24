@@ -55,15 +55,14 @@ Plaçons-nous dans le plan avec l’exemple suivant :
 
 ![](src/rotation.gif)
 
-Nous avons ici une rotation d’angle a autour de l’origine.
+Nous avons ici une rotation d’angle $`a`$ autour de l’origine.
 En supposant que les points $`A`$ et $`B`$ soient sur le cercle trigonométrique (pour ceux qui aurait oublié : $`A(1,0)`$ et $`B(0,1)`$), nous avons clairement :
 
 ```math
-x_{A’} = cos(a) \quad \text{et} \quad x_{B’} = -sin(a)
-```
-
-```math
-y_{A’} = sin(a) \quad \text{et} \quad y_{B’} = cos(a)
+\begin{matrix}
+x_{A’} = cos(a) & x_{B’} = -sin(a)\\
+y_{A’} = sin(a) & y_{B’} = cos(a)
+\end{matrix}
 ```
 
 Cette opération n’est autre qu’un calcul matriciel, et vous devez certainement savoir comment l’effectuer.
