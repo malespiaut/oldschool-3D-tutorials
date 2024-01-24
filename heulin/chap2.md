@@ -120,6 +120,10 @@ Voici un petit schéma simple qui va vous éclairer l’esprit sur ce principe f
 
 ![](src/perspec.gif)
 
+```math
+\frac{d}{Z} = \frac{Y’}{Y} \leftarrow Y’ = \frac{d \times Y}{Z}
+```
+
 Vous constatez qu’il est simple de calculer la valeur de $`Y’`$.
 Il en est de même pour $`X’`$.
 Si vous ne comprenez pas ce principe, reprenez vos cours de math de 4ème, c’est au programme !
