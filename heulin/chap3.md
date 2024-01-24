@@ -96,19 +96,31 @@ Voici l’allure qu’auront nos matrices pour une rotation respectivement autou
 ```math
 R_{x} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & cos(a) & -sin(a) \\ 0 & sin(a) & cos(a) \end{bmatrix}
 
-\begin{equation}
+\begin{align}
 x’ = x\\
 y’ = y \times cos(a) - z \times sin(a)\\
 z’ = y \times sin(a) + z \times cos(a)
-\end{equation}
+\end{align}
 ```
 
 ```math
 R_{y} = \begin{bmatrix} cos(a) & 0 & -sin(a) \\ 0 & 1 & 0 \\ sin(a) & 0 & cos(a) \end{bmatrix}
+
+\begin{align}
+x’ = x \times cos(a) + z \times sin(a)\\
+y’ = y\\
+z’ = -x \times sin(a) + z \times cos(a)
+\end{align}
 ```
 
 ```math
 R_{z} = \begin{bmatrix} cos(a) & -sin(a) & 0 \\ sin(a) & cos(a) & 0 \\ 0 & 0 & 1 \end{bmatrix}
+
+\begin{align}
+x’ = x \times cos(a) + y \times sin(a)\\
+y’ = -x \times sin(a) - y \times cos(a)\\
+z’ = z
+\end{align}
 ```
 
 
