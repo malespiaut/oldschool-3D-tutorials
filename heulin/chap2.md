@@ -7,19 +7,19 @@ Aussi, dessiner un objet en 3D peut ne pas paraître simple au premier abord.
 Selon le problème, les structures utilisées peuvent différer.
 Nous allons donc nous limiter à une seule représentation, la plus intuitive et très certainement la plus simple à mettre en oeuvre, qui est une représentation hiérarchique.
 
-Nous allons travailler dans le repère cartésien (O,X,Y,Z) qui sera notre espace image.
+Nous allons travailler dans le repère cartésien $`(O,X,Y,Z)`$ qui sera notre espace image.
 Un objet 3D est caractérisé par sa forme et sa position.
 La forme d’un objet est définie par un ensemble de facettes planes, et une face est logiquement définie par les coordonnées de ses sommets.
 En général, les coordonnées sont exprimées par rapport au centre de l’objet.
 Ce centre est utilisé comme centre de rotation de l’objet.
 
 Ainsi, la position d’un objet dans notre espace image est définie d’une part par les coordonnées de son centre, et d’autre part par son orientation dans l’espace.
-Ceci nous mène donc naturellement à utiliser un vecteur de translation (Xoff,Yoff,Zoff) et trois angles de rotation distincts (un pour chaque axe).
+Ceci nous mène donc naturellement à utiliser un vecteur de translation $`(Xoff,Yoff,Zoff)`$ et trois angles de rotation distincts (un pour chaque axe).
 
 Pour déterminer la position d’un objet, nous devons connaître les coordonnées de chacun des sommets qui composent ses faces.
 En pratique, un même sommet est commun à plusieurs faces.
 C’est pourquoi, afin de ne pas recalculer plusieurs fois les mêmes coordonnées, nous ne travaillons qu’avec des points.
-Au lieu d’avoir une liste de coordonnées (x,y,z) pour représenter nos faces, nous n’aurons qu’une simple liste de numéros référençant les points de l’objet.
+Au lieu d’avoir une liste de coordonnées $`(x,y,z)`$ pour représenter nos faces, nous n’aurons qu’une simple liste de numéros référençant les points de l’objet.
 
 ## Un exemple simple
 
@@ -114,17 +114,17 @@ Point cube2[8]= { -100,-100,-100,
 ```
 
 Pour afficher tous les sommets de notre cube, nous devons transformer leurs coordonnées 3D en coordonnées 2D, ce qui revient à faire une projection.
-Le principe en est simple : il suffit de diviser les valeurs X et Y de chaque point par la troisième valeur Z.
+Le principe en est simple : il suffit de diviser les valeurs $`X`$ et $`Y`$ de chaque point par la troisième valeur $`Z`$.
 Nous avons alors une *projection perspective*.
 Voici un petit schéma simple qui va vous éclairer l’esprit sur ce principe fondamental en 3D :
 
 ![](src/perspec.gif)
 
-Vous constatez qu’il est simple de calculer la valeur de Y’.
-Il en est de même pour X’.
+Vous constatez qu’il est simple de calculer la valeur de $`Y’`$.
+Il en est de même pour $`X’`$.
 Si vous ne comprenez pas ce principe, reprenez vos cours de math de 4ème, c’est au programme !
 
-En pratique, il est avantageux de choisir pour valeur de ***d*** une puissance de 2 : cela permet de remplacer une multiplication par un simple décalage arithmétique, beaucoup moins coûteux en temps machine (même si cette tendance disparaît peu à peu).
+En pratique, il est avantageux de choisir pour valeur de $`d`$ une puissance de 2 : cela permet de remplacer une multiplication par un simple décalage arithmétique, beaucoup moins coûteux en temps machine (même si cette tendance disparaît peu à peu).
 Voici une procédure C qui affiche chacun des points du cube en blanc :
 
 ```C
