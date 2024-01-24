@@ -190,28 +190,26 @@ Pour des objets concaves, tels un tore ou le petit canard, il faudra en plus tri
 Étant donné les restrictions que nous avons fait sur la position de l’observateur, il nous est facile de calculer la visibilité d’une face.
 Il suffit en effet de tester le signe de sa normale Pour obtenir la normale d’une face, il faut faire ce que l’on appelle un produit vectoriel : on associe à deux vecteurs un troisième qui leur est perpendiculaire.
 
-![](src/vectoriel.gif)
-
 ```math
 \overrightarrow{a} \cdot \overrightarrow{b} =
 
-\begin{matrix}
+\begin{bmatrix}
 a1 \\ a2 \\ a3
-\end{matrix}
+\end{bmatrix}
 
 \cdot
 
-\begin{matrix}
+\begin{bmatrix}
 b1 \\ b2 \\ b3
-\end{matrix}
+\end{bmatrix}
 
 =
 
-\begin{matrix}
-a1 & a2 & a3
-\end{matrix}
-
-
+\begin{bmatrix}
+a2 \cdot b3 - a3 \cdot b2 \\
+a3 \cdot b1 - a1 \cdot b3 \\
+a1 \cdot b2 - a2 \cdot b1
+\end{bmatrix}
 ```
 
 Voilà ce que cela donne en C :
