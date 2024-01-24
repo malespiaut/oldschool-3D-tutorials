@@ -177,7 +177,7 @@ Pour exprimer aussi les translations, les changements d’échelle et les projec
 Ainsi, si $`(x,y,z)`$ sont les coordonnées d’un point de la scène à transformer et $`M_{H}`$ la matrice $`4 \times 4`$ de coordonnées homogènes, on effectuera la multiplication :
 
 ```math
-**M_{H} \times [ x y z 1 ]
+M_{H} \times [ x y z 1 ]
 ```
 
 ce qui donnera comme résultat $`[ X Y Z H ]`$.
