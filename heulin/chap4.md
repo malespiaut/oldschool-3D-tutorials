@@ -23,6 +23,7 @@ Les sources complètes sont disponibles dans [cube2.zip](src/cube2.zip).
 Une des étapes essentielles à l’animation est la rotation des sommets.
 Maintenant que nous savons comment cela fonctionne, nous allons écrire une fonction.
 
+```C
     void Rotation(int Xa, int Ya, int Za)
     { 
       int i;
@@ -58,6 +59,7 @@ Maintenant que nous savons comment cela fonctionne, nous allons écrire une fonc
 
        }
     }
+```
 
 Comme vous pouvez le constater, nous calculons au préalable la matrice de rotation, et ensuite nous transformons chaque sommet.
 Si l’on ne tient pas compte de l’étape de calcul de la matrice, cela nous fera ensuite 9 multiplications par sommets.
@@ -71,6 +73,7 @@ Je ne vais pas vous faire de démonstration, je vous donne simplement la fonctio
 A titre d’indication, je n’ai pas noté de gain notable sur ma machine, mais les fous d’optimisation y trouveront leur compte.
 Sachez aussi que l’on peut encore réduire le nombre de multiplications.
 
+```C
     void Rotation6Mul(int Xa, int Ya, int Za)
     {
       int i;
@@ -110,15 +113,19 @@ Sachez aussi que l’on peut encore réduire le nombre de multiplications.
                        + matrice[2][2]*Sommet[i].z;
       } 
     }
+```
 
 Il faut ajouter un nouveau champ à chaque sommet, appelé ici `Sommet[i].xy`.
 Cette valeur doit être initialisée au début du programme et n’a pas besoin d’être recalculée par la suite.
 
+```C
     Sommet[i].xy = - Sommet[i].x*Sommet[i].y;
+```
 
 Après avoir fait la rotation de chacun des sommets de notre joli petit cube, il nous faut encore les projeter sur notre écran.
 Pour simplifier le code (et l’optimiser un tout petit peu), nous allons placer l’observateur dans l’axe exact de l’objet (face au centre de l’écran).
 
+```C
     void Projection(void)
     {
       int i;
@@ -129,11 +136,13 @@ Pour simplifier le code (et l’optimiser un tout petit peu), nous allons placer
         Point2D[i].y=(Point3D[i].y<<8)/(Point3D[i].z+Zoff)+Yoff;
       }
     }
+```
 
 Comme vous le voyez, rien de bien compliqué, surtout si vous avez compris les justifications mathématiques.
 
 Il ne nous reste plus qu’à afficher le tout à l’écran, sinon ça risque de ne pas donner grand chose :o)
 
+```C
     void Afficher(int couleur)
     {
       int i;
@@ -149,6 +158,7 @@ Il ne nous reste plus qu’à afficher le tout à l’écran, sinon ça risque d
       WaitVbl();
       ShowBuffer();
     }
+```
 
 En fait, on ne fait qu’afficher tous les sommets du cube.
 Étant donné qu’on utilise un écran virtuel, il faut effacer son contenu avant de commencer à dessiner dedans.
@@ -159,6 +169,7 @@ Enfin il ne reste plus qu’à gérer cette animation.
 Nous allons tout simplement faire tourner notre cube autour du centre de l’écran.
 Ce n’est certes pas très extraordinaire, mais c’est très simple à faire :
 
+```C
       /* Animation de note cube jusqu'a pression d'une touche */
       while(!kbhit())
       {
@@ -169,6 +180,7 @@ Ce n’est certes pas très extraordinaire, mais c’est très simple à faire :
         ya=(ya+3)%360;
         za=(za+1)%360;
       }
+```
 
 ![](src/cube2.gif)
 
@@ -205,6 +217,7 @@ La pente du segment à afficher est donnée par $`\frac{Dy}{Dx}`$.
 La méthode utilisée consiste à allumer des points dans une seule direction, ici la direction $`x`$, et n’allumer de points dans la direction $`y`$ que si l’erreur entre la pente obtenue et la pente idéale dépasse un certain seuil.
 Ainsi, si $`(x,y)`$ sont les coordonnées du point courant (en cours d’affichage), on aura en arithmétique réelle :
 
+```C
     pente = Dy/Dx
     y = y1
     pour x variant de x1 à x2
@@ -212,6 +225,7 @@ Ainsi, si $`(x,y)`$ sont les coordonnées du point courant (en cours d’afficha
        afficher(x,arrondi(y))
        y = y + a
     }
+```
 
 ![](src/ligne.gif)
 
@@ -225,6 +239,7 @@ Pour éviter d’avoir des réels, on utilisera $`Dy`$ comme pente au lieu de $`
 
 Voilà la fonction C qui tient compte de tous les cas de figures possibles :
 
+```C
     void Line(int x1,int y1, int x2,int y2, int couleur)
     {
       int x,y;
@@ -281,6 +296,7 @@ Voilà la fonction C qui tient compte de tous les cas de figures possibles :
             }
         }
     }
+```
 
 ## Représentation filière (fil de fer)
 
@@ -291,6 +307,7 @@ Pour remédier à ce problème, il faut en principe ajouter des informations sup
 Faire ce travail à la main est en général très laborieux, aussi il est bon d’utiliser des objets provenants d’un modeleur.
 Pour l’instant, notre cube est assez simple pour faire ce travail manuellement.
 
+```C
     void FilDeFer(int couleur)
     {
      /* On affiche la face avant */
@@ -307,13 +324,16 @@ Pour l’instant, notre cube est assez simple pour faire ce travail manuellement
      ligne(2,7,couleur);
      ligne(3,6,couleur);
     }
+```
 
-La fonction ligne est là pour simplifier le code et le rendre plus lisible :
+La fonction `ligne()` est là pour simplifier le code et le rendre plus lisible :
 
+```C
     void ligne(int a, int b, int couleur)
     {
       Line(Point2D[a].x,Point2D[a].y,Point2D[b].x,Point2D[b].y,couleur);
     }
+```
 
 ![](src/cube3.gif)
 
@@ -335,6 +355,7 @@ Rapidement, les objets sont formés uniquement de facettes triangulaires, et un 
 Après la liste des points et de leur coordonnées X, Y et Z (éventuellement U et V pour les textures) on trouve la liste des facettes.
 Voici un exemple de « loader » de fichier `.ASC` :
 
+```C
     /************************************************************************/
     /* ChargerASC() : charge en memoire un objet au format .asc             */
     /*                (format ascii de 3DS)                                 */
@@ -453,6 +474,7 @@ Voici un exemple de « loader » de fichier `.ASC` :
 
       fclose(fichier);
     }
+```
 
 Bien entendu, vous pouvez retrouver un exemple de programme utilisant cette fonction dans [objet.zip](src/objet.zip).
 Pour lancer l’executable, vous pouvez taper par exemple :
