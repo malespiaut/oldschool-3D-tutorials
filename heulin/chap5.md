@@ -403,7 +403,7 @@ z = \frac{-D-Ax-By}{C}
 Maintenant, si pour le point $`(x,y)`$ nous avons trouvé pour z la valeur z1, au point $`(x+dx,y)`$ nous aurons pour z:
 
 ```math
-z1 - \frac{A}{C} \times dx
+z = z1 - \frac{A}{C} \times dx
 ```
 
 $`\frac{A}{C}`$ est constant, et dans notre algorithme de remplissage de polygone $`dx=1`$.
