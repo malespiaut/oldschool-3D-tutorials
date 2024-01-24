@@ -135,7 +135,8 @@ Mais il nous reste encore un problème à résoudre : comment afficher une objet
 ## La projection
 
 Pour passer d’une dimension 3 à une dimension 2, il faut projeter les coordonnées des sommets qui composent la scène à visualiser.
-Il existe plusieurs types de projection : la *projection parallèle* et la *projection perspective.* La première est utilisée en architecture, alors que le seconde est utilisée pour le rendu réaliste, car elle rend compte des distances et donne véritablement une impression de profondeur à la scène.
+Il existe plusieurs types de projection : la *projection parallèle* et la *projection perspective*.
+La première est utilisée en architecture, alors que le seconde est utilisée pour le rendu réaliste, car elle rend compte des distances et donne véritablement une impression de profondeur à la scène.
 C’est celle que nous avons vue dans le chapitre précédent, et que nous allons utiliser par la suite.
 
 Dans ce cas de figure, le principe consiste à projeter les points sur un plan situé devant le point d’observation.
@@ -147,8 +148,8 @@ Reprenons notre petit schéma :
 \frac{d}{Z} = \frac{Y’}{Y} \leftarrow Y’ = \frac{d \times Y}{Z}
 ```
 
-Vous constatez qu’il est simple de calculer la valeur de Y’.
-Il en est de même pour X’.
+Vous constatez qu’il est simple de calculer la valeur de $`Y’`$.
+Il en est de même pour $`X’`$.
 Il s’agit ici d’une formule simplifiée pour nos besoins, et qui va s’avérer très rapide est efficace, mais qui risque de nous limiter.
 Donc si jamais vous avez besoin un jour d’un vrai formules de projection perspective, vous avez de la chance les voici :
 
