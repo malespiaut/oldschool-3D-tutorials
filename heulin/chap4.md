@@ -119,23 +119,22 @@ Il faut ajouter un nouveau champ à chaque sommet, appelé ici `Sommet[i].xy`.
 Cette valeur doit être initialisée au début du programme et n’a pas besoin d’être recalculée par la suite.
 
 ```C
-    Sommet[i].xy = - Sommet[i].x*Sommet[i].y;
+Sommet[i].xy = -Sommet[i].x * Sommet[i].y;
 ```
 
 Après avoir fait la rotation de chacun des sommets de notre joli petit cube, il nous faut encore les projeter sur notre écran.
 Pour simplifier le code (et l’optimiser un tout petit peu), nous allons placer l’observateur dans l’axe exact de l’objet (face au centre de l’écran).
 
 ```C
-    void Projection(void)
-    {
-      int i;
-
-      for(i=0;i<Nb_points;i++)
-      {
-        Point2D[i].x=(Point3D[i].x<<8)/(Point3D[i].z+Zoff)+Xoff;
-        Point2D[i].y=(Point3D[i].y<<8)/(Point3D[i].z+Zoff)+Yoff;
-      }
-    }
+void
+Projection(void)
+{
+  for (size_t i = 0; i < Nb_points; i++)
+  {
+    Point2D[i].x = (Point3D[i].x << 8) / (Point3D[i].z + Zoff) + Xoff;
+    Point2D[i].y = (Point3D[i].y << 8) / (Point3D[i].z + Zoff) + Yoff;
+  }
+}   
 ```
 
 Comme vous le voyez, rien de bien compliqué, surtout si vous avez compris les justifications mathématiques.
@@ -143,21 +142,22 @@ Comme vous le voyez, rien de bien compliqué, surtout si vous avez compris les j
 Il ne nous reste plus qu’à afficher le tout à l’écran, sinon ça risque de ne pas donner grand chose :o)
 
 ```C
-    void Afficher(int couleur)
-    {
-      int i;
+void
+Afficher(int couleur)
+{
+  // On efface le contenu de l'écran virtuel
+  ClearBuffer();
 
-      /* On efface le contenu de l'ecran virtuel */
-      ClearBuffer();
+  // On dessine dedans
+  for (size_t i = 0; i < 8; i++)
+  {
+    PutPixel(Point2D[i].x, Point2D[i].y, couleur);
+  }
 
-      /* On dessine dedans */
-      for (i=0;i<8;i++)
-        PutPixel(Point2D[i].x,Point2D[i].y,couleur);
-
-      /* On affiche le tout a l'ecran, en synchonisant */
-      WaitVbl();
-      ShowBuffer();
-    }
+  // On affiche le tout a l'écran, en synchonisant
+  WaitVbl();
+  ShowBuffer();
+}
 ```
 
 En fait, on ne fait qu’afficher tous les sommets du cube.
@@ -170,16 +170,16 @@ Nous allons tout simplement faire tourner notre cube autour du centre de l’éc
 Ce n’est certes pas très extraordinaire, mais c’est très simple à faire :
 
 ```C
-      /* Animation de note cube jusqu'a pression d'une touche */
-      while(!kbhit())
-      {
-        Rotation(xa,ya,za);
-        Projection();
-        Afficher(100);
-        xa=(xa+1)%360;
-        ya=(ya+3)%360;
-        za=(za+1)%360;
-      }
+// Animation de note cube jusqu'à pression d'une touche
+while (!kbhit())
+{
+  Rotation(xa, ya, za);
+  Projection();
+  Afficher(100);
+  xa = (xa + 1) % 360;
+  ya = (ya + 3) % 360;
+  za = (za + 1) % 360;
+}
 ```
 
 ![](src/cube2.gif)
@@ -217,14 +217,14 @@ La pente du segment à afficher est donnée par $`\frac{Dy}{Dx}`$.
 La méthode utilisée consiste à allumer des points dans une seule direction, ici la direction $`x`$, et n’allumer de points dans la direction $`y`$ que si l’erreur entre la pente obtenue et la pente idéale dépasse un certain seuil.
 Ainsi, si $`(x,y)`$ sont les coordonnées du point courant (en cours d’affichage), on aura en arithmétique réelle :
 
-```C
-    pente = Dy/Dx
-    y = y1
-    pour x variant de x1 à x2
-    {
-       afficher(x,arrondi(y))
-       y = y + a
-    }
+```
+pente = Dy / Dx
+y = y1
+pour x variant de x1 à x2
+{
+  afficher(x, arrondi(y))
+  y = y + a
+}
 ```
 
 ![](src/ligne.gif)
@@ -240,62 +240,73 @@ Pour éviter d’avoir des réels, on utilisera $`Dy`$ comme pente au lieu de $`
 Voilà la fonction C qui tient compte de tous les cas de figures possibles :
 
 ```C
-    void Line(int x1,int y1, int x2,int y2, int couleur)
+void
+Line(int x1, int y1, int x2, int y2, int couleur)
+{
+  int x;
+  int y;
+  int Dx;
+  int Dy;
+  int xincr;
+  int yincr;
+  int erreur;
+
+  // On initialise nos variables
+  Dx = abs(x2 - x1);
+  Dy = abs(y2 - y1);
+
+  if (x1 < x2)
+  {
+    xincr = 1;
+  }
+  else
+  {
+    xincr = -1;
+  }
+
+  if (y1 < y2)
+  {
+    yincr = 1;
+  }
+  else
+  {
+    yincr = -1;
+  }
+
+  // Trace de ligne
+  x = x1;
+  y = y1;
+  if (Dx > Dy)
+  {
+    erreur = Dx / 2; // c'est plus esthétique comme ça
+    for (size_t i = 0; i < Dx; i++)
     {
-      int x,y;
-      int Dx,Dy;
-      int xincr,yincr;
-      int erreur;
-      int i;
-
-      /* On initialise nos variables */
-      Dx = abs(x2-x1);
-      Dy = abs(y2-y1);
-
-      if(x1<x2)
-        xincr = 1;
-      else
-        xincr = -1;
-
-      if(y1<y2)
-        yincr = 1;
-      else
-        yincr = -1;
-
-      /* Trace de ligne */
-      x = x1;
-      y = y1;
-      if(Dx>Dy)
-        {
-          erreur = Dx/2;     /* c'est plus esthetique comme ca */
-          for(i=0;i<Dx;i++)
-            {
-              x += xincr;
-              erreur += Dy;
-              if(erreur>Dx)
-                {
-                  erreur -= Dx;
-                  y += yincr;
-                }
-              PutPixel(x,y,couleur);
-            }
-        }
-      else
-        {
-          erreur = Dy/2;     /* c'est plus esthetique comme ca */
-          for(i=0;i<Dy;i++)
-            {
-              y += yincr;
-              erreur += Dx;
-              if(erreur>Dy)
-                {
-                  erreur -= Dy;
-                  x += xincr;
-                }
-              PutPixel(x,y,couleur);
-            }
-        }
+      x += xincr;
+      erreur += Dy;
+      if (erreur > Dx)
+      {
+        erreur -= Dx;
+        y += yincr;
+      }
+      PutPixel(x, y, couleur);
     }
+  }
+  else
+  {
+    erreur = Dy / 2; // c'est plus esthétique comme ça
+    for (size_t i = 0; i < Dy; i++)
+    {
+      y += yincr;
+      erreur += Dx;
+      if (erreur > Dy)
+      {
+        erreur -= Dy;
+        x += xincr;
+      }
+      PutPixel(x, y, couleur);
+    }
+  }
+}
 ```
 
 ## Représentation filière (fil de fer)
@@ -308,31 +319,37 @@ Faire ce travail à la main est en général très laborieux, aussi il est bon d
 Pour l’instant, notre cube est assez simple pour faire ce travail manuellement.
 
 ```C
-    void FilDeFer(int couleur)
-    {
-     /* On affiche la face avant */
-     ligne(0,1,couleur); ligne(1,2,couleur);
-     ligne(2,3,couleur); ligne(3,0,couleur);
+void
+FilDeFer(int couleur)
+{
+  // On affiche la face avant
+  ligne(0, 1, couleur);
+  ligne(1, 2, couleur);
+  ligne(2, 3, couleur);
+  ligne(3, 0, couleur);
 
-     /* Puis la face arriere */
-     ligne(4,5,couleur); ligne(5,6,couleur);
-     ligne(6,7,couleur); ligne(7,4,couleur);
+  // Puis la face arriere
+  ligne(4, 5, couleur);
+  ligne(5, 6, couleur);
+  ligne(6, 7, couleur);
+  ligne(7, 4, couleur);
 
-     /* Et enfin les arêtes restantes */
-     ligne(0,5,couleur);
-     ligne(1,4,couleur);
-     ligne(2,7,couleur);
-     ligne(3,6,couleur);
-    }
+  // Et enfin les arêtes restantes
+  ligne(0, 5, couleur);
+  ligne(1, 4, couleur);
+  ligne(2, 7, couleur);
+  ligne(3, 6, couleur);
+}
 ```
 
 La fonction `ligne()` est là pour simplifier le code et le rendre plus lisible :
 
 ```C
-    void ligne(int a, int b, int couleur)
-    {
-      Line(Point2D[a].x,Point2D[a].y,Point2D[b].x,Point2D[b].y,couleur);
-    }
+void
+ligne(int a, int b, int couleur)
+{
+  Line(Point2D[a].x, Point2D[a].y, Point2D[b].x, Point2D[b].y, couleur);
+}
 ```
 
 ![](src/cube3.gif)
@@ -356,124 +373,172 @@ Après la liste des points et de leur coordonnées X, Y et Z (éventuellement U 
 Voici un exemple de « loader » de fichier `.ASC` :
 
 ```C
-    /************************************************************************/
-    /* ChargerASC() : charge en memoire un objet au format .asc             */
-    /*                (format ascii de 3DS)                                 */
-    /*                La memoire n'est pas allouee dynamiquement dans un    */
-    /*                soucis de lisibilite (programme a but pedagogique     */
-    /************************************************************************/
+/************************************************************************/
+/* ChargerASC() : charge en memoire un objet au format .asc             */
+/*                (format ascii de 3DS)                                 */
+/*                La memoire n'est pas allouee dynamiquement dans un    */
+/*                soucis de lisibilite (programme a but pedagogique     */
+/************************************************************************/
 
-    void ChargerASC(char *nom)
+void
+ChargerASC(char* nom)
+{
+  FILE* fichier;
+  char chaine[200];
+  char* fin;
+  int i;
+  int j;
+  char temp[50];
+  float x;
+  float y;
+  float z;
+  int a;
+  int b;
+  int c;
+
+  int decalage = 0;
+
+  if ((fichier = fopen(nom, "rt")) == NULL)
+  {
+    perror("Impossible d'ouvrir le fichier en lecture");
+    exit(-2);
+  }
+
+  do
+  {
+    // On lit le fichier contenant les informations sur l'objet
+    fin = fgets(chaine, 100, fichier);
+    if (!strncmp(chaine, "Vertex", 6))
     {
-      FILE  *fichier;
-      char  chaine[200];
-      char  *fin;
-      int   i,j;
-      char  temp[50];
-      float x,y,z;
-      int   a,b,c;
-
-      int decalage=0;
-
-      if ((fichier = fopen(nom,"rt"))==NULL)
+      if (strncmp(chaine, "Vertex list", 11))
       {
-        perror("Impossible d'ouvrir le fichier en lecture");
-        exit(-2);
+        // Lecture des coordonnées d'un point
+        i = 0;
+
+        while (chaine[i] != 'X')
+        {
+          i++;
+        }
+        i += 2;
+        while (chaine[i] == ' ')
+        {
+          i++;
+        }
+        sscanf(chaine + i, "%f", &x);
+
+        while (chaine[i] != 'Y')
+        {
+          i++;
+        }
+        i += 2;
+        while (chaine[i] == ' ')
+        {
+          i++;
+        }
+        sscanf(chaine + i, "%f", &y);
+
+        while (chaine[i] != 'Z')
+        {
+          i++;
+        }
+        i += 2;
+        while (chaine[i] == ' ')
+        {
+          i++;
+        }
+        sscanf(chaine + i, "%f", &z);
+
+        Sommet[Nb_points].x = x;
+        Sommet[Nb_points].y = y;
+        Sommet[Nb_points].z = z;
+
+        Nb_points++;
       }
-
-      do
-      {
-        // On lit le fichier contenant les informations sur l'objet
-        fin=fgets(chaine,100,fichier);
-        if (!strncmp(chaine,"Vertex",6))
-        {
-          if (strncmp(chaine,"Vertex list",11))
-          {
-            // Lecture des coordonnées d'un point
-            i=0;
-
-            while(chaine[i]!='X') i++;
-            i+=2;
-            while(chaine[i]==' ') i++;
-            sscanf(chaine+i,"%f",&x);
-
-            while(chaine[i]!='Y') i++;
-            i+=2;
-            while(chaine[i]==' ') i++;
-            sscanf(chaine+i,"%f",&y);
-
-            while(chaine[i]!='Z') i++;
-            i+=2;
-            while(chaine[i]==' ') i++;
-            sscanf(chaine+i,"%f",&z);
-
-            Sommet[Nb_points].x=x;
-            Sommet[Nb_points].y=y;
-            Sommet[Nb_points].z=z;
-
-            Nb_points++;
-          }
-        }
-        else
-        {
-          if (!strncmp(chaine,"Face",4))
-          {
-            if (strncmp(chaine,"Face list",9))
-            {
-              // Lecture d'une facette
-              i=j=0;
-              while(chaine[i]!='A') i++;
-              i+=2;
-              j=i;
-              while(chaine[j]!=' ') j++;
-              strncpy(temp,chaine+i,j-i);
-              temp[j-i]=0;
-              Facette[Nb_faces].a=atoi(temp)+decalage;
-
-              while(chaine[i]!='B') i++;
-              i+=2;
-              j=i;
-              while(chaine[j]!=' ') j++;
-              strncpy(temp,chaine+i,j-i);
-
-              temp[j-i]=0;
-              Facette[Nb_faces].b=atoi(temp)+decalage;
-
-              while(chaine[i]!='C') i++;
-              i+=2;
-              j=i;
-              while(chaine[j]!=' ') j++;
-              strncpy(temp,chaine+i,j-i);
-              temp[j-i]=0;
-              Facette[Nb_faces].c=atoi(temp)+decalage;
-
-              // Lecture des aretes visibles
-              while(chaine[i]!='A') i++;
-
-              strncpy(temp,chaine+i+3,1);
-              temp[j-i]=0;
-              Facette[Nb_faces].ab=atoi(temp);
-
-              strncpy(temp,chaine+i+8,1);
-              temp[j-i]=0;
-              Facette[Nb_faces].bc=atoi(temp);
-
-              strncpy(temp,chaine+i+13,1);
-              temp[j-i]=0;
-              Facette[Nb_faces].ac=atoi(temp);
-
-              Nb_faces++;
-            }
-          }
-          else
-            if (!strncmp(chaine,"Named object",12))
-              decalage=Nb_points;
-        }
-      } while(fin!=NULL);
-
-
-      fclose(fichier);
     }
+    else
+    {
+      if (!strncmp(chaine, "Face", 4))
+      {
+        if (strncmp(chaine, "Face list", 9))
+        {
+          // Lecture d'une facette
+          i = j = 0;
+          while (chaine[i] != 'A')
+          {
+            i++;
+          }
+          i += 2;
+          j = i;
+          while (chaine[j] != ' ')
+          {
+            j++;
+          }
+          strncpy(temp, chaine + i, j - i);
+          temp[j - i] = 0;
+          Facette[Nb_faces].a = atoi(temp) + decalage;
+
+          while (chaine[i] != 'B')
+          {
+            i++;
+          }
+          i += 2;
+          j = i;
+          while (chaine[j] != ' ')
+          {
+            j++;
+          }
+          strncpy(temp, chaine + i, j - i);
+
+          temp[j - i] = 0;
+          Facette[Nb_faces].b = atoi(temp) + decalage;
+
+          while (chaine[i] != 'C')
+          {
+            i++;
+          }
+          i += 2;
+          j = i;
+          while (chaine[j] != ' ')
+          {
+            j++;
+          }
+          strncpy(temp, chaine + i, j - i);
+          temp[j - i] = 0;
+          Facette[Nb_faces].c = atoi(temp) + decalage;
+
+          // Lecture des aretes visibles
+          while (chaine[i] != 'A')
+          {
+            i++;
+          }
+
+          strncpy(temp, chaine + i + 3, 1);
+          temp[j - i] = 0;
+          Facette[Nb_faces].ab = atoi(temp);
+
+          strncpy(temp, chaine + i + 8, 1);
+          temp[j - i] = 0;
+          Facette[Nb_faces].bc = atoi(temp);
+
+          strncpy(temp, chaine + i + 13, 1);
+          temp[j - i] = 0;
+          Facette[Nb_faces].ac = atoi(temp);
+
+          Nb_faces++;
+        }
+      }
+      else
+      {
+        if (!strncmp(chaine, "Named object", 12))
+        {
+          decalage = Nb_points;
+        }
+      }
+    }
+  } while (fin != NULL);
+
+  fclose(fichier);
+}
 ```
 
 Bien entendu, vous pouvez retrouver un exemple de programme utilisant cette fonction dans [objet.zip](src/objet.zip).
