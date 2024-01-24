@@ -95,11 +95,12 @@ Voici l’allure qu’auront nos matrices pour une rotation respectivement autou
 
 ```math
 R_{x} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & cos(a) & -sin(a) \\ 0 & sin(a) & cos(a) \end{bmatrix}
-\begin{align}
-  x+y+z = 1\\
-  x+y+z = \frac{5}{2}\\
-  x+y+z = 5
-\end{align}
+
+\begin{equation}
+x’ = x\\
+y’ = y \times cos(a) - z \times sin(a)\\
+z’ = y \times sin(a) + z \times cos(a)
+\end{equation}
 ```
 
 ```math
