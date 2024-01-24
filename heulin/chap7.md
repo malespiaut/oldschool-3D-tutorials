@@ -180,48 +180,59 @@ Pour simplifier les choses, on suppose que la texture est rectangulaire (c’est
 
 Assez parlé, voilà le code :
 
-    void HlineTexture(int x1,int u1,int v1,int x2,int u2,int v2, 
-                      int y,char *texture)
+```C
+void
+HlineTexture(int x1, int u1, int v1, int x2, int u2, int v2, int y, char* texture)
+{
+  long longueur;
+  long deltax;
+  long deltay;
+  long xincr;
+  long yincr;
+  long xpos;
+  long ypos;
+  int indice;
+  long src;
+  int x;
+  int temp;
+
+  if (x1 > x2)
+  {
+    temp = x1;
+    x1 = x2;
+    x2 = temp;
+    temp = u1;
+    u1 = u2;
+    u2 = temp;
+    temp = v1;
+    v1 = v2;
+    v2 = temp;
+  }
+
+  longueur = x2 - x1 + 1;
+  if (longueur > 0)
+  {
+    deltax = u2 - u1 + 1;
+    deltay = v2 - v1 + 1;
+
+    indice = y * Xmax + x1;
+
+    xincr = ((long)(deltax) << 8) / (long)longueur;
+    yincr = ((long)(deltay) << 8) / (long)longueur;
+
+    xpos = u1 << 8;
+    ypos = v1 << 8;
+
+    for (x = x1; x <= x2; x++)
     {
-      long longueur;
-      long deltax,deltay;
-      long xincr,yincr;
-      long xpos,ypos;
-      int  indice;
-      long src;
-      int  x,temp;
-
-
-      if(x1>x2)
-      {
-        temp=x1; x1=x2; x2=temp;
-        temp=u1; u1=u2; u2=temp;
-        temp=v1; v1=v2; v2=temp;
-      }
-
-      longueur=x2-x1+1;
-      if(longueur>0)
-      {
-        deltax = u2-u1+1;
-        deltay = v2-v1+1;
-
-        indice = y*Xmax+x1;
-
-        xincr=((long)(deltax)<<8)/(long)longueur;
-        yincr=((long)(deltay)<<8)/(long)longueur;
-
-        xpos=u1<<8;
-        ypos=v1<<8;
-
-        for(x=x1;x<=x2;x++)
-        {
-          src = (xpos>>8) + (ypos & 0xFF00) + ((ypos & 0xFF00)>>2);
-          screen[indice++]=texture[src];
-          xpos+=xincr;
-          ypos+=yincr;
-        }
-      }
+      src = (xpos >> 8) + (ypos & 0xFF00) + ((ypos & 0xFF00) >> 2);
+      screen[indice++] = texture[src];
+      xpos += xincr;
+      ypos += yincr;
     }
+  }
+}
+```
 
 Le calcul de `src` peut vous choquer, alors je vais vous expliquer : dans mon cas je suppose que la **texture est en 320 par 200**.
 Donc le point à accéder se trouve à l’emplacement $`(V \times 320+U)`$, soit $`\frac{ypos}{256} \times 320+(xpos \times 256)`$.
