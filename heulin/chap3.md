@@ -41,10 +41,10 @@ y’ = sy \times y
 ```
 
 Le point $`P’(x’,y’)`$ sera le point obtenu par la multiplication du point $`P`$ et de la matrice $`S(sx,sy)`$.
-On écrira donc $`P’= S \cdot P`$, où S est une matrice du type :
+On écrira donc $`P’= S \cdot P`$, où $`S`$ est une matrice du type :
 
 ```math
- S = \begin{bmatrix} Sx & 0 \\ 0 & Sy \end{bmatrix}
+S = \begin{bmatrix} Sx & 0 \\ 0 & Sy \end{bmatrix}
 ```
 
 ## La rotation
@@ -56,7 +56,7 @@ Plaçons-nous dans le plan avec l’exemple suivant :
 ![](src/rotation.gif)
 
 Nous avons ici une rotation d’angle a autour de l’origine.
-En supposant que les points A et B soient sur le cercle trigonométrique (pour ceux qui aurait oublié : A(1,0) et B(0,1)), nous avons clairement :
+En supposant que les points $`A`$ et $`B`$ soient sur le cercle trigonométrique (pour ceux qui aurait oublié : $`A(1,0)`$ et $`B(0,1)`$), nous avons clairement :
 
 ```math
 x_{A’} = cos(a) \quad \text{et} \quad x_{B’} = -sin(a)
@@ -67,19 +67,44 @@ y_{A’} = sin(a) \quad \text{et} \quad y_{B’} = cos(a)
 ```
 
 Cette opération n’est autre qu’un calcul matriciel, et vous devez certainement savoir comment l’effectuer.
-La rotation matrice de la **rotation R** d’angle **a** est donc :
+La rotation matrice de la rotation $`R`$ d’angle $`a`$ est donc :
 
 ![](src/matrice2d.gif)
 
-On peut maintenant généraliser le problème à tous les points du plan en utilisant cette matrice R.
-La rotation d’un point P autour de l’origine devient alors :
+```math
+R = \begin{bmatrix} cos(a) & -sin(a) \\ sin(a) & cos(a) \end{bmatrix}
+```
+
+On peut maintenant généraliser le problème à tous les points du plan en utilisant cette matrice $`R`$.
+La rotation d’un point $`P`$ autour de l’origine devient alors :
+
+```math
+x’ = x \times cos(a) - y \times sin(a)
+```
+
+```math
+y’ = x \times sin(a) + y \times cos(a)
+```
 
 Pour passer en 3D, rien de plus facile : il suffit d’ajouter une dimension à notre matrice.
 Dans une rotation, il est important de distinguer les axes concernés ; aussi nous allons voir la matrice associée à la rotation autour de chaque axe.
 Commençons par la rotation autour de l’axe des X : il est clair que nous pouvons déduire la matrice à partir de celle que nous venons de voir.
 Il suffit pour cela d’observer que la rotation autour de l’axe des X ne modifiera pas les composantes X des coordonnées du point considéré (où de l’objet).
 
-Voici l’allure qu’auront nos matrices pour une rotation respectivement autour des des axes X,Y et Z :
+Voici l’allure qu’auront nos matrices pour une rotation respectivement autour des des axes X, Y et Z :
+
+```math
+R_{x} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & cos(a) & -sin(a) \\ 0 & sin(a) & cos(a) \end{bmatrix}
+```
+
+```math
+R_{y} = \begin{bmatrix} cos(a) & 0 & -sin(a) \\ 0 & 1 & 0 \\ sin(a) & 0 & cos(a) \end{bmatrix}
+```
+
+```math
+R_{z} = \begin{bmatrix} cos(a) & -sin(a) & 0 \\ sin(a) & cos(a) & 0 \\ 0 & 0 & 1 \end{bmatrix}
+```
+
 
 +-----------------------------------+-----------------------------------+
 | ![](src/matrice3dx.gif)           | **x’ = x**                       |
