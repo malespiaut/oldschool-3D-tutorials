@@ -73,45 +73,46 @@ A titre d’indication, je n’ai pas noté de gain notable sur ma machine, mais
 Sachez aussi que l’on peut encore réduire le nombre de multiplications.
 
 ```C
-    void Rotation6Mul(int Xa, int Ya, int Za)
-    {
-      int i;
-      float a[3];
+void
+Rotation6Mul(int Xa, int Ya, int Za)
+{
+  matrice[0][0] = Cos[Za] * Cos[Ya];
+  matrice[1][0] = Sin[Za] * Cos[Ya];
+  matrice[2][0] = -Sin[Ya];
 
-      matrice[0][0] = Cos[Za]*Cos[Ya];
-      matrice[1][0] = Sin[Za]*Cos[Ya];
-      matrice[2][0] = -Sin[Ya];
+  matrice[0][1] = Cos[Za] * Sin[Ya] * Sin[Xa] - Sin[Za] * Cos[Xa];
+  matrice[1][1] = Sin[Za] * Sin[Ya] * Sin[Xa] + Cos[Xa] * Cos[Za];
+  matrice[2][1] = Sin[Xa] * Cos[Ya];
 
-      matrice[0][1] = Cos[Za]*Sin[Ya]*Sin[Xa] - Sin[Za]*Cos[Xa];
-      matrice[1][1] = Sin[Za]*Sin[Ya]*Sin[Xa] + Cos[Xa]*Cos[Za];
-      matrice[2][1] = Sin[Xa]*Cos[Ya];
+  matrice[0][2] = Cos[Za] * Sin[Ya] * Cos[Xa] + Sin[Za] * Sin[Xa];
+  matrice[1][2] = Sin[Za] * Sin[Ya] * Cos[Xa] - Cos[Za] * Sin[Xa];
+  matrice[2][2] = Cos[Xa] * Cos[Ya];
 
-      matrice[0][2] = Cos[Za]*Sin[Ya]*Cos[Xa] + Sin[Za]*Sin[Xa];
-      matrice[1][2] = Sin[Za]*Sin[Ya]*Cos[Xa] - Cos[Za]*Sin[Xa];
-      matrice[2][2] = Cos[Xa]*Cos[Ya];
+  float a[3] = {
+    [0] = -(matrice[0][1] * matrice[0][0]),
+    [1] = -(matrice[1][1] * matrice[1][0]),
+    [2] = -(matrice[2][1] * matrice[2][0]),
+  };
 
-      a[0]=-(matrice[0][1]*matrice[0][0]);
-      a[1]=-(matrice[1][1]*matrice[1][0]);
-      a[2]=-(matrice[2][1]*matrice[2][0]);
+  for (size_t i = 0; i < Nb_points; i++)
+  {
+    Point3D[i].x = (matrice[0][1] + Sommet[i].x)
+                 * (matrice[0][0] + Sommet[i].y)
+                 + a[0] + Sommet[i].xy
+                 + matrice[0][2] * Sommet[i].z;
 
-      for(i=0;i<Nb_points;i++)
-      {
-        Point3D[i].x =   (matrice[0][1]+Sommet[i].x)
-                       * (matrice[0][0]+Sommet[i].y)
-                       + a[0] + Sommet[i].xy
-                       + matrice[0][2]*Sommet[i].z;
+    Point3D[i].y = (matrice[1][1] + Sommet[i].x)
+                 * (matrice[1][0] + Sommet[i].y)
+                 + a[1] + Sommet[i].xy
+                 + matrice[1][2] * Sommet[i].z;
 
-        Point3D[i].y =   (matrice[1][1]+Sommet[i].x)
-                       * (matrice[1][0]+Sommet[i].y)
-                       + a[1] + Sommet[i].xy
-                       + matrice[1][2]*Sommet[i].z;
+    Point3D[i].z = (matrice[2][1] + Sommet[i].x)
+                 * (matrice[2][0] + Sommet[i].y)
+                 + a[2] + Sommet[i].xy
+                 + matrice[2][2] * Sommet[i].z;
+  }
+}
 
-        Point3D[i].z =   (matrice[2][1]+Sommet[i].x)
-                       * (matrice[2][0]+Sommet[i].y)
-                       + a[2] + Sommet[i].xy
-                       + matrice[2][2]*Sommet[i].z;
-      } 
-    }
 ```
 
 Il faut ajouter un nouveau champ à chaque sommet, appelé ici `Sommet[i].xy`.
