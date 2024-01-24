@@ -24,41 +24,40 @@ Une des étapes essentielles à l’animation est la rotation des sommets.
 Maintenant que nous savons comment cela fonctionne, nous allons écrire une fonction.
 
 ```C
-    void Rotation(int Xa, int Ya, int Za)
-    { 
-      int i;
+void
+Rotation(int Xa, int Ya, int Za)
+{
+  // Calcul de la matrice de rotation 3*3
 
-      /* Calcul de la matrice de rotation 3*3 */
+  matrice[0][0] = Cos[Za] * Cos[Ya];
+  matrice[1][0] = Sin[Za] * Cos[Ya];
+  matrice[2][0] = -Sin[Ya];
 
-      matrice[0][0] = Cos[Za]*Cos[Ya]; 
-      matrice[1][0] = Sin[Za]*Cos[Ya]; 
-      matrice[2][0] = -Sin[Ya];
+  matrice[0][1] = Cos[Za] * Sin[Ya] * Sin[Xa] - Sin[Za] * Cos[Xa];
+  matrice[1][1] = Sin[Za] * Sin[Ya] * Sin[Xa] + Cos[Xa] * Cos[Za];
+  matrice[2][1] = Sin[Xa] * Cos[Ya];
 
-      matrice[0][1] = Cos[Za]*Sin[Ya]*Sin[Xa] - Sin[Za]*Cos[Xa]; 
-      matrice[1][1] = Sin[Za]*Sin[Ya]*Sin[Xa] + Cos[Xa]*Cos[Za]; 
-      matrice[2][1] = Sin[Xa]*Cos[Ya];
+  matrice[0][2] = Cos[Za] * Sin[Ya] * Cos[Xa] + Sin[Za] * Sin[Xa];
+  matrice[1][2] = Sin[Za] * Sin[Ya] * Cos[Xa] - Cos[Za] * Sin[Xa];
+  matrice[2][2] = Cos[Xa] * Cos[Ya];
 
-      matrice[0][2] = Cos[Za]*Sin[Ya]*Cos[Xa] + Sin[Za]*Sin[Xa]; 
-      matrice[1][2] = Sin[Za]*Sin[Ya]*Cos[Xa] - Cos[Za]*Sin[Xa]; 
-      matrice[2][2] = Cos[Xa]*Cos[Ya];
+  // Rotation des sommets de l'objet
+  for (size_t i = 0; i < Nb_points; i++)
+  {
+    Point3D[i].x = matrice[0][0] * Sommet[i].x +
+                   matrice[1][0] * Sommet[i].y +
+                   matrice[2][0] * Sommet[i].z;
 
-      /* Rotation des sommets de l'objet */
-      for(i=0;i<Nb_points;i++) 
-        { 
-          Point3D[i].x = matrice[0][0]*Sommet[i].x + 
-                         matrice[1][0]*Sommet[i].y + 
-                         matrice[2][0]*Sommet[i].z;
+    Point3D[i].y = matrice[0][1] * Sommet[i].x +
+                   matrice[1][1] * Sommet[i].y +
+                   matrice[2][1] * Sommet[i].z;
 
-          Point3D[i].y = matrice[0][1]*Sommet[i].x + 
-                         matrice[1][1]*Sommet[i].y + 
-                         matrice[2][1]*Sommet[i].z;
+    Point3D[i].z = matrice[0][2] * Sommet[i].x +
+                   matrice[1][2] * Sommet[i].y +
+                   matrice[2][2] * Sommet[i].z;
+  }
+}
 
-          Point3D[i].z = matrice[0][2]*Sommet[i].x + 
-                         matrice[1][2]*Sommet[i].y + 
-                         matrice[2][2]*Sommet[i].z; }
-
-       }
-    }
 ```
 
 Comme vous pouvez le constater, nous calculons au préalable la matrice de rotation, et ensuite nous transformons chaque sommet.
