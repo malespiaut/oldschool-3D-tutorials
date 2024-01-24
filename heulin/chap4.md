@@ -10,7 +10,8 @@ Aussi, afin de pousser encore un peu plus la portabilité de mes programmes, je 
 Ainsi, la seule fonction non portable est celle qui effectue le transfert de cette zone mémoire vers la zone d’écran.
 Il est donc relativement simple d’adapter les programmes à n’importe quel type de machine.
 
-A titre d’illustration, l’ensemble de ces primitives a été regroupé dans un fichier séparé, [graphics.c.](src/graphics.c) A ce niveau, il n’est pas nécessaire de se soucier de la manière dont cela est géré, même si c’est relativement simple.
+À titre d’illustration, l’ensemble de ces primitives a été regroupé dans un fichier séparé, [graphics.c](src/graphics.c).
+À ce niveau, il n’est pas nécessaire de se soucier de la manière dont cela est géré, même si c’est relativement simple.
 Par la suite, dans un soucis d’optimisation, il faudra pouvoir accéder directement à l’écran virtuel sans passer par des primitives.
 
 ## Animation des sommets d’un cube
@@ -69,7 +70,7 @@ Il est possible d’améliorer encore cette rotation.
 Une méthode bien connue de tous aujourd’hui permet de descendre à 6 multiplications par sommets.
 Pour arriver à ce résultat il suffit de factoriser de façon judicieuse.
 Je ne vais pas vous faire de démonstration, je vous donne simplement la fonction correspondante.
-A titre d’indication, je n’ai pas noté de gain notable sur ma machine, mais les fous d’optimisation y trouveront leur compte.
+À titre d’indication, je n’ai pas noté de gain notable sur ma machine, mais les fous d’optimisation y trouveront leur compte.
 Sachez aussi que l’on peut encore réduire le nombre de multiplications.
 
 ```C
@@ -311,7 +312,7 @@ Line(int x1, int y1, int x2, int y2, int couleur)
 
 ## Représentation filière (fil de fer)
 
-A présent nous pouvons afficher notre cube en fil de fer, sans tenir compte pour le moment des faces cachées ([cube3.zip](src/cube3.zip)).
+À présent nous pouvons afficher notre cube en fil de fer, sans tenir compte pour le moment des faces cachées ([cube3.zip](src/cube3.zip)).
 Pour cela, il suffit d’afficher chaque arête de chacune des faces.
 On s’aperçoit donc que certaines arêtes sont affichées plusieurs fois, ce qui est inutile.
 Pour remédier à ce problème, il faut en principe ajouter des informations supplémentaires à nos facettes, pour dire quelles sont les arêtes à afficher.

@@ -1,6 +1,6 @@
 # Introduction
 
-## Présentation]
+## Présentation
 
 La 3D est depuis longtemps très largement utilisée en informatique, et les exemples d’applications ne manquent pas.
 Mais pour nombre de programmeurs, faire de la 3D relève encore du mystère.
@@ -279,8 +279,6 @@ y_{A’} = sin(a) \quad \text{et} \quad y_{B’} = cos(a)
 Cette opération n’est autre qu’un calcul matriciel, et vous devez certainement savoir comment l’effectuer.
 La rotation matrice de la rotation $`R`$ d’angle $`a`$ est donc :
 
-![](src/matrice2d.gif)
-
 ```math
 R = \begin{bmatrix} cos(a) & -sin(a) \\ sin(a) & cos(a) \end{bmatrix}
 ```
@@ -339,7 +337,7 @@ En fait, le problème est un petit peu plus compliqué que ça, et l’on en rep
 On peut en effet n’avoir qu’une seule matrice : il suffit de les combiner entre elles.
 Il s’agit encore une fois d’un simple produit matriciel, mais je ne vous donnerez pas la formule, elle est trop longue pour tenir sur une seule ligne :o) Si vous etes courageux je vous laisse le soin de la trouver.
 
-A ce niveau, vous pouvez déjà réaliser toutes les animations que vous voulez, puisque nous avons abordé toutes les bases mathématiques nécessaires.
+À ce niveau, vous pouvez déjà réaliser toutes les animations que vous voulez, puisque nous avons abordé toutes les bases mathématiques nécessaires.
 Mais il nous reste encore un problème à résoudre : comment afficher une objet représenté en 3D sur un petit écran tout plat qui ne compte lui que 2 dimensions ? Rassurez-vous, la solution est relativement simple, et si vous avez suivit jusque-là cela ne vous causera en principe pas de problème particulier.
 
 ## La projection
@@ -411,7 +409,8 @@ Aussi, afin de pousser encore un peu plus la portabilité de mes programmes, je 
 Ainsi, la seule fonction non portable est celle qui effectue le transfert de cette zone mémoire vers la zone d’écran.
 Il est donc relativement simple d’adapter les programmes à n’importe quel type de machine.
 
-A titre d’illustration, l’ensemble de ces primitives a été regroupé dans un fichier séparé, [graphics.c.](src/graphics.c) A ce niveau, il n’est pas nécessaire de se soucier de la manière dont cela est géré, même si c’est relativement simple.
+À titre d’illustration, l’ensemble de ces primitives a été regroupé dans un fichier séparé, [graphics.c](src/graphics.c).
+À ce niveau, il n’est pas nécessaire de se soucier de la manière dont cela est géré, même si c’est relativement simple.
 Par la suite, dans un soucis d’optimisation, il faudra pouvoir accéder directement à l’écran virtuel sans passer par des primitives.
 
 ## Animation des sommets d’un cube
@@ -470,7 +469,7 @@ Il est possible d’améliorer encore cette rotation.
 Une méthode bien connue de tous aujourd’hui permet de descendre à 6 multiplications par sommets.
 Pour arriver à ce résultat il suffit de factoriser de façon judicieuse.
 Je ne vais pas vous faire de démonstration, je vous donne simplement la fonction correspondante.
-A titre d’indication, je n’ai pas noté de gain notable sur ma machine, mais les fous d’optimisation y trouveront leur compte.
+À titre d’indication, je n’ai pas noté de gain notable sur ma machine, mais les fous d’optimisation y trouveront leur compte.
 Sachez aussi que l’on peut encore réduire le nombre de multiplications.
 
 ```C
@@ -712,7 +711,7 @@ Line(int x1, int y1, int x2, int y2, int couleur)
 
 ## Représentation filière (fil de fer)
 
-A présent nous pouvons afficher notre cube en fil de fer, sans tenir compte pour le moment des faces cachées ([cube3.zip](src/cube3.zip)).
+À présent nous pouvons afficher notre cube en fil de fer, sans tenir compte pour le moment des faces cachées ([cube3.zip](src/cube3.zip)).
 Pour cela, il suffit d’afficher chaque arête de chacune des faces.
 On s’aperçoit donc que certaines arêtes sont affichées plusieurs fois, ce qui est inutile.
 Pour remédier à ce problème, il faut en principe ajouter des informations supplémentaires à nos facettes, pour dire quelles sont les arêtes à afficher.
@@ -1930,7 +1929,7 @@ tout simplement parce que ces données sont invariables, et qu’ainsi je vais s
 
 Pour remplir nos polygones, nous utilisions en plus de `startx` et `endx`, les tableaux `startcol` et `endcol`.
 Pour le mapping, nous n’allons pas utiliser les 2 derniers tableaux, sauf si vous voulez combiner Textures et Gouraud, mais là je vous laisse faire (je ne vais pas vous mâcher tout le travail non plus).
-A la place nous allons avoir une jolie petite structure ce qui évitera de se promener avec 4 tableaux différents :
+À la place nous allons avoir une jolie petite structure ce qui évitera de se promener avec 4 tableaux différents :
 
 ```C
 struct

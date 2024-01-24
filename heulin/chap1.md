@@ -1,6 +1,6 @@
 # Introduction
 
-## Présentation]
+## Présentation
 
 La 3D est depuis longtemps très largement utilisée en informatique, et les exemples d’applications ne manquent pas.
 Mais pour nombre de programmeurs, faire de la 3D relève encore du mystère.

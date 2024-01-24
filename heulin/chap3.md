@@ -69,8 +69,6 @@ y_{A’} = sin(a) \quad \text{et} \quad y_{B’} = cos(a)
 Cette opération n’est autre qu’un calcul matriciel, et vous devez certainement savoir comment l’effectuer.
 La rotation matrice de la rotation $`R`$ d’angle $`a`$ est donc :
 
-![](src/matrice2d.gif)
-
 ```math
 R = \begin{bmatrix} cos(a) & -sin(a) \\ sin(a) & cos(a) \end{bmatrix}
 ```
@@ -129,7 +127,7 @@ En fait, le problème est un petit peu plus compliqué que ça, et l’on en rep
 On peut en effet n’avoir qu’une seule matrice : il suffit de les combiner entre elles.
 Il s’agit encore une fois d’un simple produit matriciel, mais je ne vous donnerez pas la formule, elle est trop longue pour tenir sur une seule ligne :o) Si vous etes courageux je vous laisse le soin de la trouver.
 
-A ce niveau, vous pouvez déjà réaliser toutes les animations que vous voulez, puisque nous avons abordé toutes les bases mathématiques nécessaires.
+À ce niveau, vous pouvez déjà réaliser toutes les animations que vous voulez, puisque nous avons abordé toutes les bases mathématiques nécessaires.
 Mais il nous reste encore un problème à résoudre : comment afficher une objet représenté en 3D sur un petit écran tout plat qui ne compte lui que 2 dimensions ? Rassurez-vous, la solution est relativement simple, et si vous avez suivit jusque-là cela ne vous causera en principe pas de problème particulier.
 
 ## La projection
