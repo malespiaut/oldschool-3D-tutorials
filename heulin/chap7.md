@@ -60,7 +60,7 @@ pointMap Point2D[1000]; // les sommets après projection
 
 tout simplement parce que ces données sont invariables, et qu’ainsi je vais simplifier mon code, mais c’est une question de goût.
 
-Pour remplir nos polygones, nous utilisions en plus de **startx** et **endx**, les tableaux **startcol** et **endcol**.
+Pour remplir nos polygones, nous utilisions en plus de `startx` et `endx`, les tableaux `startcol` et `endcol`.
 Pour le mapping, nous n’allons pas utiliser les 2 derniers tableaux, sauf si vous voulez combiner Textures et Gouraud, mais là je vous laisse faire (je ne vais pas vous mâcher tout le travail non plus).
 A la place nous allons avoir une jolie petite structure ce qui évitera de se promener avec 4 tableaux différents :
 
