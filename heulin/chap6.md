@@ -57,7 +57,7 @@ Pour cela, il suffit de combiner les 2 égalités pour obtenir finalement :
 
 ```math
 cos(alpha) = \frac{\overrightarrow{a} \cdot \overrightarrow{b}}{a \cdot b}
-= frac{a1 \cdot b1 + a2 \cdot b2 + a3 \cdot b3}{a \cdot b}
+= \frac{a1 \cdot b1 + a2 \cdot b2 + a3 \cdot b3}{a \cdot b}
 ```
 
 
