@@ -123,29 +123,9 @@ z’ = z
 \end{align}
 ```
 
-
-+-----------------------------------+-----------------------------------+
-| ![](src/matrice3dx.gif)           | **x’ = x**                       |
-|                                   |                                   |
-|                                   | **y’ = y\*cos(a) - z\*sin(a)**   |
-|                                   |                                   |
-|                                   | **z’ = y\*sin(a) + z\*cos(a)**   |
-+-----------------------------------+-----------------------------------+
-| ![](matrice3dy.gif){height="150"  | **x’ = x\*cos(a) + z\*sin(a)**   |
-| width="200"}                      |                                   |
-|                                   | **y’ = y**                       |
-|                                   |                                   |
-|                                   | **z’ = -x\*sin(a) + z\*cos(a)**  |
-+-----------------------------------+-----------------------------------+
-| ![](matrice3dz.gif){height="150"  | **x’ = x\*cos(a) + y\*sin(a)**   |
-| width="200"}                      |                                   |
-|                                   | **y’ = -x\*sin(a) + y\*cos(a)**  |
-|                                   |                                   |
-|                                   | **z’ = z**                       |
-+-----------------------------------+-----------------------------------+
-
 Voilà pour nos rotations.
-Mais, me direz-vous, pourquoi se promener avec 3 matrices, et non pas une seule ? En fait, le problème est un petit peu plus compliqué que ça, et l’on en reparlera un peu plus tard lorsque nous verrons les matrices homogènes.
+Mais, me direz-vous, pourquoi se promener avec 3 matrices, et non pas une seule ?
+En fait, le problème est un petit peu plus compliqué que ça, et l’on en reparlera un peu plus tard lorsque nous verrons les matrices homogènes.
 On peut en effet n’avoir qu’une seule matrice : il suffit de les combiner entre elles.
 Il s’agit encore une fois d’un simple produit matriciel, mais je ne vous donnerez pas la formule, elle est trop longue pour tenir sur une seule ligne :o) Si vous etes courageux je vous laisse le soin de la trouver.
 
@@ -163,17 +143,25 @@ Reprenons notre petit schéma :
 
 ![](src/perspec.gif)
 
+```math
+\frac{d}{Z} = \frac{Y’}{Y} \leftarrow Y’ = \frac{d \times Y}{Z}
+```
+
 Vous constatez qu’il est simple de calculer la valeur de Y’.
 Il en est de même pour X’.
 Il s’agit ici d’une formule simplifiée pour nos besoins, et qui va s’avérer très rapide est efficace, mais qui risque de nous limiter.
 Donc si jamais vous avez besoin un jour d’un vrai formules de projection perspective, vous avez de la chance les voici :
 
-**X’ = Xo + Zo \* (X-Xo) / (Zo-Z)**
+```math
+X’ = Xo + Zo \times \frac{X-Xo}{Zo-Z}
+```
 
-**Y’ = Yo + Zo \* (Y-Yo) / (Zo-Z)**
+```math
+Y’ = Yo + Zo \times \frac{Y-Yo}{Zo-Z}
+```
 
-Ces formules tiennent compte de la position de l’observateur, qui est situé au point **O(Xo,Yo,Zo)**.
-En supposant que l’on ait Xo=Yo=0, on a l’oeil qui est situé quelque par sur l’axe des Z, et l’on retombe sur les formules précédentes.
+Ces formules tiennent compte de la position de l’observateur, qui est situé au point $`O(Xo,Yo,Zo)`$.
+En supposant que l’on ait $`Xo=Yo=0`$, on a l’oeil qui est situé quelque par sur l’axe des Z, et l’on retombe sur les formules précédentes.
 C’est une petite optimisation qui simplifie la vie des débutants, mais qui n’est pas valable dans le cas général.
 
 Comme vous l’avez certainement constaté, le dessin en 2D n’est pas réellement mon domaine de prédilection.
@@ -182,19 +170,21 @@ Je ne vais donc pas vous faire de petit dessin pour illustrer mes formules, d’
 ## Les coordonnées homogènes
 
 Les coordonnées homogènes sont utilisées en synthèse d’image afin d’unifier le traitement des transformations géométriques d’une scène et de les regrouper dans une seule matrice.
-En effet, si l’on utilise une matrice 2\*2 pour les scènes bidimensionnelles et une matrice 3\*3 pour les scènes tridimensionnelles, ces matrices ne peuvent exprimer que des rotations.
+En effet, si l’on utilise une matrice $`2 \times 2`$ pour les scènes bidimensionnelles et une matrice $`3 \times 3`$ pour les scènes tridimensionnelles, ces matrices ne peuvent exprimer que des rotations.
 
-Pour exprimer aussi les translations, les changements d’échelle et les projections, on va utiliser des matrices 4\*4 pour les scènes tridimensionnelles.
+Pour exprimer aussi les translations, les changements d’échelle et les projections, on va utiliser des matrices $`4 \times 4`$ pour les scènes tridimensionnelles.
 
-Ainsi, si (x,y,z) sont les coordonnées d’un point de la scène à transformer et M~H~ la matrice 4\*4 de coordonnées homogènes, on effectuera la multiplication :
+Ainsi, si $`(x,y,z)`$ sont les coordonnées d’un point de la scène à transformer et $`M_{H}`$ la matrice $`4 \times 4`$ de coordonnées homogènes, on effectuera la multiplication :
 
-**M~H~ \* \[ x y z 1 \]**
+```math
+**M_{H} \times [ x y z 1 ]
+```
 
-ce qui donnera comme résultat \[ X Y Z H \].
+ce qui donnera comme résultat $`[ X Y Z H ]`$.
 
-Les coordonnées du point transformé seront alors (X/H , Y/H , Z/H).
+Les coordonnées du point transformé seront alors $`(\frac{X}{H}, \frac{Y}{H}, \frac{Z}{H})`$.
 
-La matrice 4\*4 des coordonnées homogènes peut être considérée comme étant composée de 4 sous-matrices, chacune d’elle étant associée à un type de transformation.
+La matrice $`4 \times 4`$ des coordonnées homogènes peut être considérée comme étant composée de 4 sous-matrices, chacune d’elle étant associée à un type de transformation.
 
 ![](src/homogene.gif)
 
